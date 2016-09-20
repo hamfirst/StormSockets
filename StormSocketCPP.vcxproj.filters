@@ -1,0 +1,1674 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="SSL">
+      <UniqueIdentifier>{4e3a0d12-8053-4054-85ea-9f669ed839d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="asio">
+      <UniqueIdentifier>{d8f15a0c-25b4-47dc-93e7-e076cc18764e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="optional">
+      <UniqueIdentifier>{0ae5161e-63f4-4bda-add3-3109ee15e00e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="StormFixedBlockAllocator.cpp" />
+    <ClCompile Include="StormHttpBodyReader.cpp" />
+    <ClCompile Include="StormHttpHeaderValues.cpp" />
+    <ClCompile Include="StormHttpRequestReader.cpp" />
+    <ClCompile Include="StormHttpRequestWriter.cpp" />
+    <ClCompile Include="StormHttpResponseReader.cpp" />
+    <ClCompile Include="StormHttpResponseWriter.cpp" />
+    <ClCompile Include="StormMessageHeaderReader.cpp" />
+    <ClCompile Include="StormMessageHeaderValues.cpp" />
+    <ClCompile Include="StormMessageReaderCursor.cpp" />
+    <ClCompile Include="StormMessageWriter.cpp" />
+    <ClCompile Include="StormProfiling.cpp" />
+    <ClCompile Include="StormSemaphore.cpp" />
+    <ClCompile Include="StormSha1.cpp" />
+    <ClCompile Include="StormSocketBackend.cpp" />
+    <ClCompile Include="StormSocketBuffer.cpp" />
+    <ClCompile Include="StormSocketClientFrontendHttp.cpp" />
+    <ClCompile Include="StormSocketClientFrontendWebsocket.cpp" />
+    <ClCompile Include="StormSocketConnectionId.cpp" />
+    <ClCompile Include="StormSocketFrontendBase.cpp" />
+    <ClCompile Include="StormSocketFrontendHttpBase.cpp" />
+    <ClCompile Include="StormSocketFrontendWebsocketBase.cpp" />
+    <ClCompile Include="StormSocketServerFrontendHttp.cpp" />
+    <ClCompile Include="StormSocketServerFrontendWebsocket.cpp" />
+    <ClCompile Include="StormSocketServerWebsocket.cpp" />
+    <ClCompile Include="StormWebsocketHeaderValues.cpp" />
+    <ClCompile Include="StormWebsocketMessageReader.cpp" />
+    <ClCompile Include="StormWebsocketMessageWriter.cpp" />
+    <ClCompile Include="..\External\mbedtls\aes.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\aesni.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\arc4.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\asn1parse.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\asn1write.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\base64.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\bignum.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\blowfish.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\camellia.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ccm.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\certs.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\cipher.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\cipher_wrap.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ctr_drbg.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\debug.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\des.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\dhm.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ecdh.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ecdsa.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ecjpake.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ecp.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ecp_curves.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\entropy.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\entropy_poll.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\error.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\gcm.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\havege.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\hmac_drbg.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\md.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\md_wrap.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\md2.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\md4.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\md5.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\net.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\memory_buffer_alloc.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\oid.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\padlock.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\pem.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\pk.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\pk_wrap.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\pkcs5.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\pkcs11.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\pkcs12.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\pkparse.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\pkwrite.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\platform.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ripemd160.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\rsa.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\sha1.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\sha256.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\sha512.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ssl_cache.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ssl_ciphersuites.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ssl_cli.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ssl_cookie.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ssl_srv.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ssl_ticket.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\ssl_tls.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\threading.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\timing.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\version.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\version_features.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\x509.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\x509_create.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\x509_crl.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\x509_crt.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\x509_csr.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\x509write_crt.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\x509write_csr.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\mbedtls\xtea.c">
+      <Filter>SSL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\asio\asio.cpp">
+      <Filter>asio</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="StormFixedBlockAllocator.h" />
+    <ClInclude Include="StormGenIndex.h" />
+    <ClInclude Include="StormHttpBodyReader.h" />
+    <ClInclude Include="StormHttpHeaderValues.h" />
+    <ClInclude Include="StormHttpRequestReader.h" />
+    <ClInclude Include="StormHttpRequestWriter.h" />
+    <ClInclude Include="StormHttpResponseReader.h" />
+    <ClInclude Include="StormHttpResponseWriter.h" />
+    <ClInclude Include="StormMemOps.h" />
+    <ClInclude Include="StormMessageHeaderReader.h" />
+    <ClInclude Include="StormMessageHeaderValues.h" />
+    <ClInclude Include="StormMessageQueue.h" />
+    <ClInclude Include="StormMessageReaderCursor.h" />
+    <ClInclude Include="StormMessageReaderData.h" />
+    <ClInclude Include="StormMessageWriter.h" />
+    <ClInclude Include="StormProfiling.h" />
+    <ClInclude Include="StormSemaphore.h" />
+    <ClInclude Include="StormSha1.h" />
+    <ClInclude Include="StormSocketBackend.h" />
+    <ClInclude Include="StormSocketBuffer.h" />
+    <ClInclude Include="StormSocketClientFrontendHttp.h" />
+    <ClInclude Include="StormSocketClientFrontendWebsocket.h" />
+    <ClInclude Include="StormSocketConnection.h" />
+    <ClInclude Include="StormSocketConnectionHttp.h" />
+    <ClInclude Include="StormSocketConnectionId.h" />
+    <ClInclude Include="StormSocketConnectionWebsocket.h" />
+    <ClInclude Include="StormSocketFrontend.h" />
+    <ClInclude Include="StormSocketFrontendBase.h" />
+    <ClInclude Include="StormSocketFrontendHttpBase.h" />
+    <ClInclude Include="StormSocketFrontendWebsocketBase.h" />
+    <ClInclude Include="StormSocketIOOperation.h" />
+    <ClInclude Include="StormSocketServerFrontendHttp.h" />
+    <ClInclude Include="StormSocketServerFrontendWebsocket.h" />
+    <ClInclude Include="StormSocketServerTypes.h" />
+    <ClInclude Include="StormSocketServerWebsocket.h" />
+    <ClInclude Include="StormWebsocketHeaderValues.h" />
+    <ClInclude Include="StormWebsocketMessageReader.h" />
+    <ClInclude Include="StormWebsocketMessageWriter.h" />
+    <ClInclude Include="..\External\asio\ip\address.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\impl\address.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\address_iterator_v4.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\address_iterator_v6.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\address_range_v4.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\address_range_v6.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\impl\address_v4.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\address_v4.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\address_v6.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\impl\address_v6.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\aes.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\aesni.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\arc4.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\array.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\array_fwd.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\asio.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\asn1.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\asn1write.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\assert.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\associated_allocator.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\associated_executor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\async_result.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\atomic_count.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\bad_address_cast.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\base_from_completion_cond.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\base64.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_datagram_socket.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_deadline_timer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\posix\basic_descriptor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\generic\basic_endpoint.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\basic_endpoint.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\local\basic_endpoint.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\impl\basic_endpoint.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\basic_handle.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_io_object.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\basic_object_handle.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\basic_random_access_handle.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_raw_socket.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\basic_resolver.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\basic_resolver_entry.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\basic_resolver_iterator.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\basic_resolver_query.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_seq_packet_socket.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_serial_port.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_signal_set.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_socket.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_socket_acceptor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_socket_iostream.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_socket_streambuf.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\posix\basic_stream_descriptor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\basic_stream_handle.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_stream_socket.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_streambuf.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_streambuf_fwd.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\basic_waitable_timer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\bind_handler.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\buffer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ts\buffer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\buffer_resize_guard.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\buffer_sequence_adapter.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\buffered_handshake_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\buffered_read_stream.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\buffered_read_stream.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\buffered_read_stream_fwd.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\buffered_stream.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\buffered_stream_fwd.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\buffered_stream_storage.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\buffered_write_stream.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\buffered_write_stream.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\buffered_write_stream_fwd.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\buffers_iterator.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\call_stack.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\chrono_time_traits.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\completion_condition.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\completion_handler.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\config.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\connect.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\connect.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\local\connect_pair.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\consuming_buffers.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\context.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\impl\context.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\context_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\coroutine.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\cstddef.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\cstdint.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\local\datagram_protocol.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\generic\datagram_protocol.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\datagram_socket_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\date_time_fwd.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\deadline_timer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\deadline_timer_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\deadline_timer_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\dependent_type.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\defer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\defer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\posix\descriptor_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\descriptor_ops.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\descriptor_read_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\descriptor_write_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\dev_poll_reactor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\impl\dev_poll_reactor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\dispatch.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\dispatch.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\generic\detail\endpoint.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\local\detail\endpoint.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\detail\endpoint.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\engine.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\epoll_reactor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\impl\epoll_reactor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\error_code.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\error.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\error.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\event.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\eventfd_select_interrupter.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\execution_context.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\execution_context.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\bignum.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\blowfish.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\bn_mul.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\camellia.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ccm.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\certs.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\check_config.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\cipher.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\cipher_internal.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\compat-1.3.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\config.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ctr_drbg.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\debug.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\des.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\dhm.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ecdh.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ecdsa.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ecjpake.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ecp.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\entropy.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\entropy_poll.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\error.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\gcm.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\havege.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\hmac_drbg.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\md.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\md_internal.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\md2.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\md4.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\md5.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\net.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\memory_buffer_alloc.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\oid.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\padlock.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\pem.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\pk.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\pk_internal.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\pkcs5.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\pkcs11.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\pkcs12.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\platform.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ripemd160.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\rsa.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\sha1.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\sha256.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\sha512.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ssl.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ssl_cache.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ssl_ciphersuites.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ssl_cookie.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ssl_internal.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\ssl_ticket.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\threading.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\timing.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\version.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\x509.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\x509_crl.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\x509_crt.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\x509_csr.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\mbedtls\xtea.h">
+      <Filter>SSL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\executor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ts\executor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\executor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\executor_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\executor_work.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\fd_set_adapter.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\fenced_block.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\functional.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\gcc_arm_fenced_block.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\gcc_hppa_fenced_block.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\gcc_sync_fenced_block.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\gcc_x86_fenced_block.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\global.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\handler_alloc_helpers.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\handler_alloc_hook.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\handler_cont_helpers.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\handler_continuation_hook.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\handler_invoke_helpers.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\handler_invoke_hook.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\handler_tracking.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\handler_type.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\handler_type_requirements.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\handler_work.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\handshake_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\hash_map.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\high_resolution_timer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\host_name.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\icmp.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ts\internet.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\io.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\io_control.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\io_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\io_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ts\io_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\io_service_strand.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\is_buffer_sequence.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\is_executor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\is_read_buffered.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\is_write_buffered.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\keyword_tss_ptr.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\impl\kqueue_reactor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\kqueue_reactor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\limits.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\local_free_on_block_exit.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\macos_fenced_block.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\memory.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\multicast.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\mutex.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\network_v4.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\impl\network_v4.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\network_v6.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\impl\network_v6.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ts\networking.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\noncopyable.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\null_event.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\null_fenced_block.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\null_global.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\null_mutex.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\null_reactor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\null_signal_blocker.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\null_socket_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\null_static_mutex.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\null_thread.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\null_tss_ptr.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\object_handle.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\object_handle_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\object_pool.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\old_win_sdk_compat.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\op_queue.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\openssl_init.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\openssl_types.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\operation.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\overlapped_ptr.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\package.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\password_callback.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\pipe_select_interrupter.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\placeholders.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\pop_options.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\posix_event.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\posix_fd_set_adapter.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\posix_global.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\posix_mutex.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\posix_signal_blocker.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\posix_static_mutex.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\posix_thread.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\posix_tss_ptr.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\post.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\post.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\push_options.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\random_access_handle.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\random_access_handle_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\generic\raw_protocol.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\raw_socket_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_descriptor_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_null_buffers_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_serial_port_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_socket_accept_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_socket_connect_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_socket_recv_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_socket_recvfrom_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_socket_recvmsg_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_socket_send_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_socket_sendto_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_socket_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_socket_service_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactive_wait_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactor_fwd.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactor_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\reactor_op_queue.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\read.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\read.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\read_at.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\read_at.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\read_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\read_until.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\read_until.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\recycling_allocator.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\regex_fwd.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\resolve_endpoint_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\resolve_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\resolver_query_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\resolver_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\resolver_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\resolver_service_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\rfc2818_verification.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\scheduler.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\scheduler_operation.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\scheduler_thread_info.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\scoped_lock.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\scoped_ptr.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\select_interrupter.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\select_reactor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\impl\select_reactor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\generic\seq_packet_protocol.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\seq_packet_socket_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\serial_port.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\serial_port_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\serial_port_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\serial_port_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\service_registry.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\impl\service_registry.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\shutdown_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\signal_blocker.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\signal_handler.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\signal_init.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\signal_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\signal_set.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\signal_set_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\signal_set_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ts\socket.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\socket_acceptor_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\socket_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\socket_holder.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\socket_ops.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\socket_option.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\detail\socket_option.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\socket_select_interrupter.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\socket_types.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\solaris_fenced_block.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\spawn.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\spawn.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\impl\src.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\src.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\static_mutex.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\std_event.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\std_global.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\std_mutex.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\std_static_mutex.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\std_thread.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\steady_timer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\optional\optional.hpp">
+      <Filter>optional</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\strand.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\impl\strand_executor_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\strand_executor_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\strand_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\impl\strand_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\stream.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\stream_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\stream_core.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\posix\stream_descriptor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\posix\stream_descriptor_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\stream_handle.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\windows\stream_handle_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\generic\stream_protocol.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\local\stream_protocol.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\stream_socket_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\streambuf.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\system_error.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\system_executor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\system_executor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\system_timer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\tcp.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\thread.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\thread.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\thread_context.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\thread_group.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\thread_info_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\thread_pool.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\thread_pool.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ts\thread_pool.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\throw_error.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\throw_exception.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\time_traits.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ts\timer.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\timer_queue.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\timer_queue_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\timer_queue_ptime.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\timer_queue_set.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\timer_scheduler.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\timer_scheduler_fwd.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\tss_ptr.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\type_traits.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\udp.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\unicast.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\unyield.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\use_future.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\use_future.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\uses_executor.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ip\v6_only.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\variadic_templates.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\verify_callback.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\verify_context.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\verify_mode.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\version.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\wait_handler.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\wait_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\wait_traits.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\waitable_timer_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_event.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_fd_set_adapter.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_fenced_block.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_global.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_handle_read_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_handle_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_handle_write_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\impl\win_iocp_io_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_io_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_null_buffers_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_operation.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_overlapped_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_overlapped_ptr.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_serial_port_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_socket_accept_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_socket_connect_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_socket_recv_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_socket_recvfrom_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_socket_recvmsg_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_socket_send_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_socket_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_socket_service_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_thread_info.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_iocp_wait_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_mutex.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_object_handle_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_static_mutex.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_thread.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\win_tss_ptr.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\wince_thread.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_async_manager.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_async_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_resolve_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_resolver_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_socket_connect_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_socket_recv_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_socket_send_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_ssocket_service.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_ssocket_service_base.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\impl\winrt_timer_scheduler.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_timer_scheduler.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winrt_utils.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\winsock_init.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\work_dispatcher.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\wrap.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\detail\wrapped_handler.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\write.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\write.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\impl\write_at.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\write_at.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\ssl\detail\write_op.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\asio\yield.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
