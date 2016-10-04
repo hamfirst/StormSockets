@@ -4,7 +4,7 @@
 namespace StormSockets
 {
 
-  StormSocketFrontendWebsocketBase::StormSocketFrontendWebsocketBase(StormSocketFrontendWebsocketSettings & settings, StormSocketBackend * backend) :
+  StormSocketFrontendWebsocketBase::StormSocketFrontendWebsocketBase(const StormSocketFrontendWebsocketSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendBase(settings, backend)
   {
     m_UseMasking = settings.UseMasking;
@@ -287,6 +287,8 @@ namespace StormSockets
                 return false;
               }
 
+              m_EventCondition.notify_one();
+
               connection.m_PacketsRecved.fetch_add(1);
               ws_connection.m_InitialReader = reader;
               ws_connection.m_LastReader = reader;
@@ -375,6 +377,8 @@ namespace StormSockets
             return false;
           }
 
+          m_EventCondition.notify_one();
+
           // Advance past this packet to check if another packet is in the buffer
           m_Backend->DiscardParserData(connection_id, ws_connection.m_PendingReaderFullPacketLen);
           ws_connection.m_State = StormSocketServerConnectionWebsocketState::ReadHeaderAndApplyMask;
@@ -401,6 +405,8 @@ namespace StormSockets
             {
               return false;
             }
+
+            m_EventCondition.notify_one();
 
             connection.m_PacketsRecved.fetch_add(1);
             ws_connection.m_ReaderValid = false;

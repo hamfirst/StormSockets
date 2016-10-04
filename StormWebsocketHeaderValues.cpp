@@ -2,7 +2,8 @@
 
 namespace StormSockets
 {
-  StormWebsocketHeaderValues::StormWebsocketHeaderValues(const char * protocol)
+  StormWebsocketHeaderValues::StormWebsocketHeaderValues(const char * protocol) :
+    StormMessageHeaderValues()
   {
     std::vector<std::string> strs;
 

@@ -18,33 +18,20 @@ namespace StormSockets
   struct StormFixedBlockHandle
   {
     int m_Index;
-
-    StormFixedBlockHandle()
-    {
-    }
-
-    StormFixedBlockHandle(int index)
-    {
-      m_Index = index;
-    }
+    void * m_MallocBlock;
 
     bool operator == (const StormFixedBlockHandle & rhs)
     {
-      return m_Index == rhs.m_Index;
+      return m_Index == rhs.m_Index && m_MallocBlock == rhs.m_MallocBlock;
     }
 
     bool operator != (const StormFixedBlockHandle & rhs)
     {
-      return m_Index != rhs.m_Index;
-    }
-
-    operator int()
-    {
-      return m_Index;
+      return m_Index != rhs.m_Index || m_MallocBlock != rhs.m_MallocBlock;
     }
   };
 
-  static const StormFixedBlockHandle InvalidBlockHandle = StormFixedBlockHandle(-1);
+  static const StormFixedBlockHandle InvalidBlockHandle = StormFixedBlockHandle{ -1, nullptr };
 
   struct StormFixedBlock
   {
@@ -55,11 +42,12 @@ namespace StormSockets
   class StormFixedBlockAllocator
   {
     unsigned char * m_BlockMem;
-    StormFixedBlockHandle * m_NextBlockList;
+    int * m_NextBlockList;
     StormGenIndex m_BlockHead;
+    unsigned int m_NumBlocks;
     unsigned int m_BlockSize;
+    unsigned int m_MemoryBlockSize;
     bool m_UseVirtual;
-    unsigned char * m_AllocState;
 
   public:
 
@@ -68,6 +56,10 @@ namespace StormSockets
 
     int GetBlockSize() { return m_BlockSize; }
 
+  private:
+    void * AllocateBlockInternal(StormFixedBlockType::Index type, StormFixedBlockHandle & handle);
+
+  public:
     StormFixedBlockHandle AllocateBlock(StormFixedBlockType::Index type);
     StormFixedBlockHandle AllocateBlock(StormFixedBlockHandle chain_head, StormFixedBlockType::Index type);
 
@@ -88,5 +80,6 @@ namespace StormSockets
 
     void FreeBlockChain(StormFixedBlockHandle handle, StormFixedBlockType::Index type);
     void FreeBlockChain(void * resolved_pointer, StormFixedBlockType::Index type);
+
   };
 }

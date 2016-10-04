@@ -58,7 +58,7 @@ namespace StormSockets
     m_ConnectionAllocator.FreeBlock(&http_connection, StormFixedBlockType::Custom);
   }
 
-  void StormSocketClientFrontendHttp::InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, void * init_data)
+  void StormSocketClientFrontendHttp::InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data)
   {
     StormSocketClientFrontendHttpRequestData * request_data = (StormSocketClientFrontendHttpRequestData *)init_data;
 
@@ -291,6 +291,8 @@ namespace StormSockets
     {
       return false;
     }
+
+    m_EventCondition.notify_one();
 
     http_connection.m_CompleteResponse = true;
     ForceDisconnect(connection_id);

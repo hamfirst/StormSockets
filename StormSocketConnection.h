@@ -44,13 +44,13 @@ namespace StormSockets
     bool m_SSLHandshakeComplete;
   };
 
-  using StormSocketFrontendConnectionId = int;
+  using StormSocketFrontendConnectionId = StormFixedBlockHandle;
 
   class StormSocketFrontend;
 
   struct StormSocketConnectionBase
   {
-    volatile int m_Socket;
+    std::atomic_flag m_Used = ATOMIC_FLAG_INIT;
     unsigned int m_RemoteIP;
     unsigned short m_RemotePort;
     StormSocketFrontend * m_Frontend;

@@ -10,11 +10,11 @@ namespace StormSockets
 {
   struct StormSocketClientFrontendWebsocketRequestData
   {
-    bool m_UseSSL;
-    const char * m_Uri;
-    const char * m_Host;
-    const char * m_Protocol;
-    const char * m_Origin;
+    bool m_UseSSL = false;
+    const char * m_Uri = "/";
+    const char * m_Host = "localhost";
+    const char * m_Protocol = nullptr;
+    const char * m_Origin = nullptr;
   };
 
 
@@ -28,8 +28,10 @@ namespace StormSockets
 
   public:
 
-    StormSocketClientFrontendWebsocket(StormSocketClientFrontendWebsocketSettings & settings, StormSocketBackend * backend);
+    StormSocketClientFrontendWebsocket(const StormSocketClientFrontendWebsocketSettings & settings, StormSocketBackend * backend);
     ~StormSocketClientFrontendWebsocket();
+
+    StormSocketConnectionId RequestConnect(const char * ip_addr, int port, const StormSocketClientFrontendWebsocketRequestData & request_data);
 
 #ifdef USE_MBED
     bool UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
@@ -43,7 +45,7 @@ namespace StormSockets
     StormSocketFrontendConnectionId AllocateFrontendId();
     void FreeFrontendId(StormSocketFrontendConnectionId frontend_id);
 
-    void InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, void * init_data);
+    void InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data);
     void CleanupConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
 
     bool ProcessData(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);

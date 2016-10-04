@@ -7,10 +7,11 @@
 
 namespace StormSockets
 {
+  static const StormSocketFrontendConnectionId InvalidFrontendId = InvalidBlockHandle;
+
   class StormSocketFrontend
   {
   public:
-    static const StormSocketFrontendConnectionId InvalidFrontendId = -1;
 
     virtual ~StormSocketFrontend() {};
 
@@ -25,7 +26,7 @@ namespace StormSockets
     virtual void AssociateConnectionId(StormSocketConnectionId connection_id) = 0;
     virtual void DisassociateConnectionId(StormSocketConnectionId connection_id) = 0;
 
-    virtual void InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, void * init_data) = 0;
+    virtual void InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data) = 0;
     virtual void CleanupConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) = 0;
 
     virtual void QueueConnectEvent(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, uint32_t remote_ip, uint16_t remote_port) = 0;

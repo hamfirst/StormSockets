@@ -249,6 +249,48 @@ namespace StormSockets
 		return v;
 	}
 
+  void StormWebsocketMessageReader::ReadByteBlock(void * data, unsigned int length)
+  {
+    void * cur_block = m_PacketInfo->m_CurBlock;
+    int read_offset = m_PacketInfo->m_ReadOffset;
+    int data_length = m_PacketInfo->m_DataLength;
 
+    while (length > 0)
+    {
+      while (data_length > 0)
+      {
+        unsigned int data_avail = m_FixedBlockSize - m_PacketInfo->m_ReadOffset;
 
+        if (data_avail > length)
+        {
+          memcpy(data, Marshal::MemOffset(cur_block, read_offset), length);
+          length = 0;
+          break;
+        }
+        else
+        {
+          memcpy(data, Marshal::MemOffset(cur_block, read_offset), data_avail);
+          length -= data_avail;
+          data_length -= data_avail;
+
+          data = Marshal::MemOffset(data, data_avail);
+          cur_block = m_Allocator->GetNextBlock(cur_block);
+          read_offset = 0;
+        }
+      }
+
+      if (length > 0 && data_length == 0)
+      {
+        Advance();
+
+        cur_block = m_PacketInfo->m_CurBlock;
+        read_offset = m_PacketInfo->m_ReadOffset;
+        data_length = m_PacketInfo->m_DataLength;
+      }
+    }
+
+    m_PacketInfo->m_CurBlock = cur_block;
+    m_PacketInfo->m_ReadOffset = read_offset;
+    m_PacketInfo->m_DataLength = data_length;
+  }
 }

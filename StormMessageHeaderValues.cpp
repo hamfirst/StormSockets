@@ -53,7 +53,7 @@ namespace StormSockets
 		}
 
 		int check_start = 4;
-		int check_end = m_DataMatch[(int)type].m_Data.length();
+		int check_end = (int)m_DataMatch[(int)type].m_Data.length();
 
 		for (int index = check_start; index < check_end; index++)
 		{
@@ -90,7 +90,7 @@ namespace StormSockets
     }
 
     int check_start = 4;
-    int check_end = m_DataMatch[(int)type].m_Data.length();
+    int check_end = (int)m_DataMatch[(int)type].m_Data.length();
 
     for (int index = check_start; index < check_end; index++)
     {
@@ -121,7 +121,7 @@ namespace StormSockets
 		}
 
 		int check_start = 4;
-		int check_end = m_DataMatch[(int)type].m_Data.length();
+		int check_end = (int)m_DataMatch[(int)type].m_Data.length();
 
 		for (int index = check_start; index < check_end; index++)
 		{
@@ -158,7 +158,7 @@ namespace StormSockets
 		}
 
 		int check_start = 4;
-		int check_end = m_DataMatch[(int)type].m_Data.length();
+		int check_end = (int)m_DataMatch[(int)type].m_Data.length();
 
 		for (int index = check_start; index < check_end; index++)
 		{
@@ -179,7 +179,7 @@ namespace StormSockets
 		while (reader_copy.GetRemainingLength() > 0)
 		{
 			int check_start = 0;
-			int check_end = m_DataMatch[(int)type].m_Data.length();
+			int check_end = (int)m_DataMatch[(int)type].m_Data.length();
 
 			bool matched = true;
 			for (int index = check_start; index < check_end; index++)
@@ -224,6 +224,6 @@ namespace StormSockets
 
 	void StormMessageHeaderValues::WriteHeader(StormMessageWriter & writer, int type)
 	{
-		writer.WriteByteBlock(m_DataMatch[(int)type].m_Data.c_str(), 0, m_DataMatch[(int)type].m_Data.length());
+		writer.WriteByteBlock(m_DataMatch[(int)type].m_Data.c_str(), 0, (int)m_DataMatch[(int)type].m_Data.length());
 	}
 }

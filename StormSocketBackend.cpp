@@ -15,7 +15,7 @@
 
 namespace StormSockets
 {
-  StormSocketBackend::StormSocketBackend(StormSocketInitSettings & settings) :
+  StormSocketBackend::StormSocketBackend(const StormSocketInitSettings & settings) :
     m_Allocator(settings.HeapSize, settings.BlockSize, true),
     m_MessageReaders(settings.MaxPendingOutgoingPacketsPerConnection * sizeof(StormMessageReaderData) * settings.MaxConnections, sizeof(StormMessageReaderData), false),
     m_MessageSenders(settings.MaxPendingOutgoingPacketsPerConnection * sizeof(StormMessageWriterData) * settings.MaxConnections, sizeof(StormMessageWriterData), false),
@@ -32,7 +32,6 @@ namespace StormSockets
 
     for (int index = 0; index < settings.MaxConnections; index++)
     {
-      m_Connections[index].m_Socket = InvalidSocketId;
       m_Connections[index].m_SlotGen = 0;
     }
 
@@ -114,7 +113,7 @@ namespace StormSockets
     for (int index = 0; index < m_MaxConnections; index++)
     {
       auto & connection = GetConnection(index);
-      if (connection.m_Socket != InvalidSocketId)
+      if (connection.m_Used.test_and_set())
       {
         auto connection_id = StormSocketConnectionId(index, connection.m_SlotGen);
         FreeConnectionResources(connection_id);
@@ -123,7 +122,7 @@ namespace StormSockets
     }
   }
 
-  StormSocketBackendAcceptorId StormSocketBackend::InitAcceptor(StormSocketFrontend * frontend, StormSocketListenData & init_data)
+  StormSocketBackendAcceptorId StormSocketBackend::InitAcceptor(StormSocketFrontend * frontend, const StormSocketListenData & init_data)
   {
     std::unique_lock<std::mutex> guard(m_AcceptorLock);
 
@@ -159,10 +158,11 @@ namespace StormSockets
     }
   }
 
-  StormSocketConnectionId StormSocketBackend::RequestConnect(StormSocketFrontend * frontend, const char * ip_addr, int port, void * init_data)
+  StormSocketConnectionId StormSocketBackend::RequestConnect(StormSocketFrontend * frontend, const char * ip_addr, int port, const void * init_data)
   {
     asio::ip::tcp::socket socket(m_IOService);
-    auto connection_id = AllocateConnection(frontend, socket.native_handle(), 0, port, true, init_data);
+
+    auto connection_id = AllocateConnection(frontend, 0, port, true, init_data);
 
     if (connection_id == StormSocketConnectionId::InvalidConnectionId)
     {
@@ -621,19 +621,18 @@ namespace StormSockets
     return false;
   }
 
-  StormSocketConnectionId StormSocketBackend::AllocateConnection(StormSocketFrontend * frontend, int socket, uint32_t remote_ip, uint16_t remote_port, bool for_connect, void * init_data)
+  StormSocketConnectionId StormSocketBackend::AllocateConnection(StormSocketFrontend * frontend, uint32_t remote_ip, uint16_t remote_port, bool for_connect, const void * init_data)
   {
     auto frontend_id = frontend->AllocateFrontendId();
-    if (frontend_id == StormSocketFrontend::InvalidFrontendId)
+    if (frontend_id == InvalidFrontendId)
     {
       return StormSocketConnectionId::InvalidConnectionId;
     }
 
     for (int index = 0; index < m_MaxConnections; index++)
     {
-      int inv_socket = InvalidSocketId;
       auto & connection = GetConnection(index);
-      if (std::atomic_compare_exchange_weak((std::atomic_int *)&connection.m_Socket, &inv_socket, socket))
+      if (connection.m_Used.test_and_set() == false)
       {
         // Set up the connection
         connection.m_DecryptBuffer = StormSocketBuffer(&m_Allocator, m_FixedBlockSize);
@@ -649,7 +648,6 @@ namespace StormSockets
         connection.m_PendingRemainingData = 0;
         connection.m_PendingFreeData = 0;
         connection.m_DisconnectFlags = 0;
-        connection.m_RecvCriticalSection = 0;
 
         connection.m_SSLContext = SSLContext();
         connection.m_RecvCriticalSection = 0;
@@ -689,7 +687,7 @@ namespace StormSockets
   void StormSocketBackend::FreeConnectionSlot(StormSocketConnectionId id)
   {
     auto & connection = GetConnection(id);
-    connection.m_Socket = InvalidSocketId;
+    connection.m_Used.clear();
   }
 
   void StormSocketBackend::PrepareToAccept(StormSocketBackendAcceptorId acceptor_id)
@@ -728,7 +726,7 @@ namespace StormSockets
     acceptor.m_AcceptSocket.set_option(asio::socket_base::linger(1, 1));
     acceptor.m_AcceptSocket.non_blocking(true);
 
-    StormSocketConnectionId connection_id = AllocateConnection(acceptor.m_Frontend, acceptor.m_AcceptSocket.native_handle(),
+    StormSocketConnectionId connection_id = AllocateConnection(acceptor.m_Frontend, 
       acceptor.m_AcceptEndpoint.address().to_v4().to_ulong(), acceptor.m_AcceptEndpoint.port(), false, nullptr);
 
     if (connection_id == StormSocketConnectionId::InvalidConnectionId)
@@ -757,7 +755,7 @@ namespace StormSockets
       {
         StormSocketConnectionBase * connection = (StormSocketConnectionBase *)ctx;
         connection->m_EncryptWriter.WriteByteBlock(data, 0, size);
-        return size;
+        return (int)size;
       };
 
       auto recv_callback = [](void * ctx, unsigned char * data, size_t size) -> int
@@ -860,7 +858,7 @@ namespace StormSockets
       {
         StormSocketConnectionBase * connection = (StormSocketConnectionBase *)ctx;
         connection->m_EncryptWriter.WriteByteBlock(data, 0, size);
-        return size;
+        return (int)size;
       };
 
       auto recv_callback = [](void * ctx, unsigned char * data, size_t size) -> int
@@ -947,7 +945,7 @@ namespace StormSockets
     {
       if (connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
       {
-        connection.m_DecryptBuffer.GotData(bytes_received);
+        connection.m_DecryptBuffer.GotData((int)bytes_received);
         while (connection.m_SSLContext.m_SSLHandshakeComplete == false)
         {
 #ifdef USE_MBED
@@ -984,8 +982,8 @@ namespace StormSockets
       else
       {
         // Data just goes directly into the recv buffer
-        connection.m_UnparsedDataLength.fetch_add(bytes_received);
-        connection.m_RecvBuffer.GotData(bytes_received);
+        connection.m_UnparsedDataLength.fetch_add((int)bytes_received);
+        connection.m_RecvBuffer.GotData((int)bytes_received);
       }
 
       PrepareToRecv(connection_id);
@@ -1016,14 +1014,14 @@ namespace StormSockets
     }
   }
 
-  void StormSocketBackend::SignalOutgoingSocket(StormSocketConnectionId id, StormSocketIOOperationType::Index type, int size)
+  void StormSocketBackend::SignalOutgoingSocket(StormSocketConnectionId id, StormSocketIOOperationType::Index type, std::size_t size)
   {
     int send_thread_index = id % m_NumSendThreads;
 
     StormSocketIOOperation op;
     op.m_ConnectionId = id;
     op.m_Type = type;
-    op.m_Size = size;
+    op.m_Size = (int)size;
 
     while (m_SendQueue[send_thread_index].Enqueue(op, 0, m_SendQueueIncdices.get(), m_SendQueueArray.get()) == false)
     {
@@ -1407,7 +1405,7 @@ namespace StormSockets
     {
       m_CloseConnectionSemaphore.WaitOne();
 
-      if (m_ClosingConnectionQueue.TryDequeue(id))
+      if (m_ClosingConnectionQueue.TryDequeue(id) == false)
       {
         CloseSocket(id);
         SetSocketDisconnected(id);

@@ -52,6 +52,8 @@ namespace StormSockets
 		uint32_t ReadInt32();
 		uint64_t ReadInt64();
 
+    void ReadByteBlock(void * data, unsigned int length);
+
   private:
     StormWebsocketMessageReader(StormFixedBlockAllocator * block_allocator, StormFixedBlockAllocator * reader_allocator, StormFixedBlockHandle cur_block,
       int data_len, int parse_offset, StormSocketConnectionId connection_id, int fixed_block_size);

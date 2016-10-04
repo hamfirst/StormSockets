@@ -3,10 +3,11 @@
 
 namespace StormSockets
 {
-  StormSocketServerFrontendWebsocket::StormSocketServerFrontendWebsocket(StormSocketServerFrontendWebsocketSettings & settings, StormSocketBackend * backend) :
+  StormSocketServerFrontendWebsocket::StormSocketServerFrontendWebsocket(
+    const StormSocketServerFrontendWebsocketSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendWebsocketBase(settings, backend),
-    m_HeaderValues(settings.Protocol),
-    m_ConnectionAllocator(sizeof(StormSocketServerConnectionWebSocket) * settings.MaxConnections, sizeof(StormSocketServerConnectionWebSocket), false)
+    m_ConnectionAllocator(sizeof(StormSocketServerConnectionWebSocket) * settings.MaxConnections, sizeof(StormSocketServerConnectionWebSocket), false),
+    m_HeaderValues(settings.Protocol)
   {
     m_HasProtocol = settings.Protocol != NULL;
 
@@ -28,7 +29,6 @@ namespace StormSockets
   StormSocketServerConnectionWebSocket & StormSocketServerFrontendWebsocket::GetWSConnection(StormSocketFrontendConnectionId id)
   {
     StormSocketServerConnectionWebSocket * ptr = (StormSocketServerConnectionWebSocket *)m_ConnectionAllocator.ResolveHandle(id);
-    new (ptr) StormSocketServerConnectionWebSocket();
     return *ptr;
   }
 
@@ -39,6 +39,9 @@ namespace StormSockets
     {
       return InvalidFrontendId;
     }
+
+    StormSocketServerConnectionWebSocket * ptr = (StormSocketServerConnectionWebSocket *)m_ConnectionAllocator.ResolveHandle(handle);
+    new (ptr) StormSocketServerConnectionWebSocket();
 
     return handle;
   }
@@ -51,7 +54,7 @@ namespace StormSockets
     m_ConnectionAllocator.FreeBlock(&ws_connection, StormFixedBlockType::Custom);
   }
 
-  void StormSocketServerFrontendWebsocket::InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, void * init_data)
+  void StormSocketServerFrontendWebsocket::InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data)
   {
     auto & ws_connection = GetWSConnection(frontend_id);
 

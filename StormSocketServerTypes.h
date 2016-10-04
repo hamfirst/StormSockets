@@ -55,7 +55,7 @@ namespace StormSockets
     int MaxConnections = 256;
 
     int HeapSize = 10 * 1024 * 1024; // 10 megs
-    int BlockSize = 4096; // The default page size
+    int BlockSize = 4096 - sizeof(StormFixedBlockHandle); // The default page size
 
     int MaxPendingOutgoingPacketsPerConnection = 32;
     int MaxPendingFreeingPacketsPerConnection = 32;

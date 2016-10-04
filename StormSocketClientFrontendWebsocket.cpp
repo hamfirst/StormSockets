@@ -8,9 +8,9 @@
 
 namespace StormSockets
 {
-  StormSocketClientFrontendWebsocket::StormSocketClientFrontendWebsocket(StormSocketClientFrontendWebsocketSettings & settings, StormSocketBackend * backend) :
+  StormSocketClientFrontendWebsocket::StormSocketClientFrontendWebsocket(const StormSocketClientFrontendWebsocketSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendWebsocketBase(settings, backend),
-    m_HeaderValues(""),
+    m_HeaderValues(nullptr),
     m_ConnectionAllocator(sizeof(StormSocketClientConnectionWebsocket) * settings.MaxConnections, sizeof(StormSocketClientConnectionWebsocket), false)
   {
     InitClientSSL(m_SSLData);
@@ -20,6 +20,12 @@ namespace StormSockets
   {
     CleanupAllConnections();
     ReleaseClientSSL(m_SSLData);
+  }
+
+  StormSocketConnectionId StormSocketClientFrontendWebsocket::RequestConnect(const char * ip_addr, int port,
+    const StormSocketClientFrontendWebsocketRequestData & request_data)
+  {
+    return m_Backend->RequestConnect(this, ip_addr, port, &request_data);
   }
 
 #ifdef USE_MBED
@@ -58,7 +64,7 @@ namespace StormSockets
     m_ConnectionAllocator.FreeBlock(&ws_connection, StormFixedBlockType::Custom);
   }
 
-  void StormSocketClientFrontendWebsocket::InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, void * init_data)
+  void StormSocketClientFrontendWebsocket::InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data)
   {
     StormSocketClientFrontendWebsocketRequestData * request_data = (StormSocketClientFrontendWebsocketRequestData *)init_data;
 
@@ -237,6 +243,7 @@ namespace StormSockets
               (ws_connection.m_Protocol.size() == 0 || ws_connection.m_GotWebsocketProtoHeader))
             {
               ws_connection.m_State = StormSocketServerConnectionWebsocketState::ReadHeaderAndApplyMask;
+              QueueHandshakeCompleteEvent(connection_id, frontend_id);
             }
             else
             {

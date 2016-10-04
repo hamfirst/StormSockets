@@ -84,42 +84,41 @@ namespace StormSockets
 			}
 		}
 
-		bool Enqueue(T message)
-		{
-			int message_index = AllocateArraySlot();
-			if (message_index == -1)
-			{
-				return false;
-			}
+    bool Enqueue(const T & message)
+    {
+      int message_index = AllocateArraySlot();
+      if (message_index == -1)
+      {
+        return false;
+      }
 
-			m_Array[message_index].MessageInfo = message;
+      m_Array[message_index].MessageInfo = message;
+      if (InsertMessageIndex(message_index) == false)
+      {
+        ReleaseArraySlot(message_index);
+        return false;
+      }
 
-			while (true)
-			{
-				int idx = m_Head;
-				int new_head = (idx + 1) % m_Length;
-				if (new_head == m_Tail)
-				{
-					ReleaseArraySlot(message_index);
-					return false;
-				}
+      return true;
+    }
 
-				int old_val = -1;
-				if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Queue[idx], &old_val, message_index))
-				{
-					while (true)
-					{
-						idx = m_Head;
-						new_head = (idx + 1) % m_Length;
+    bool Enqueue(T && message)
+    {
+      int message_index = AllocateArraySlot();
+      if (message_index == -1)
+      {
+        return false;
+      }
 
-						if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head, &idx, new_head))
-						{
-							return true;
-						}
-					}
-				}
-			}
-		}
+      m_Array[message_index].MessageInfo = message;
+      if (InsertMessageIndex(message_index) == false)
+      {
+        ReleaseArraySlot(message_index);
+        return false;
+      }
+
+      return true;
+    }
 
 		bool HasData()
 		{
@@ -142,12 +141,43 @@ namespace StormSockets
 				if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Tail, &idx, new_tail))
 				{
 					m_Queue[idx] = -1;
-					output = m_Array[val].MessageInfo;
+					output = std::move(m_Array[val].MessageInfo);
 					m_Array[val].HasData = 0;
 					return true;
 				}
 			}
 		}
+
+  private:
+
+    bool InsertMessageIndex(int message_index)
+    {
+      while (true)
+      {
+        int idx = m_Head;
+        int new_head = (idx + 1) % m_Length;
+        if (new_head == m_Tail)
+        {
+          return false;
+        }
+
+        int old_val = -1;
+        if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Queue[idx], &old_val, message_index))
+        {
+          while (true)
+          {
+            idx = m_Head;
+            new_head = (idx + 1) % m_Length;
+
+            if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head, &idx, new_head))
+            {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
 	};
 
 	template <typename T>

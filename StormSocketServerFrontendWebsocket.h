@@ -22,7 +22,7 @@ namespace StormSockets
 
   public:
 
-    StormSocketServerFrontendWebsocket(StormSocketServerFrontendWebsocketSettings & settings, StormSocketBackend * backend);
+    StormSocketServerFrontendWebsocket(const StormSocketServerFrontendWebsocketSettings & settings, StormSocketBackend * backend);
     ~StormSocketServerFrontendWebsocket();
 
 #ifdef USE_MBED
@@ -37,7 +37,7 @@ namespace StormSockets
     StormSocketFrontendConnectionId AllocateFrontendId();
     void FreeFrontendId(StormSocketFrontendConnectionId frontend_id);
 
-    void InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, void * init_data);
+    void InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data);
     void CleanupConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
     bool ProcessData(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
 

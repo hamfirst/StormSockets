@@ -61,7 +61,7 @@ namespace StormSockets
     void WriteInt16(uint16_t s);
     void WriteInt32(uint32_t i);
     void WriteInt64(uint64_t l);
-    void WriteByteBlock(const void * buffer, int start_offset, int length);
+    void WriteByteBlock(const void * buffer, int start_offset, std::size_t length);
     void RemoveBytes(int length);
 
     void WriteString(const char * str);

@@ -16,7 +16,7 @@ namespace StormSockets
 
   public:
 
-    StormSocketFrontendWebsocketBase(StormSocketFrontendWebsocketSettings & settings, StormSocketBackend * backend);
+    StormSocketFrontendWebsocketBase(const StormSocketFrontendWebsocketSettings & settings, StormSocketBackend * backend);
 
     StormWebsocketMessageWriter CreateOutgoingPacket(StormSocketWebsocketDataType::Index type, bool final);
     void FinalizeOutgoingPacket(StormWebsocketMessageWriter & writer);

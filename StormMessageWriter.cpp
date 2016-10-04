@@ -187,19 +187,19 @@ namespace StormSockets
     }
   }
 
-  void StormMessageWriter::WriteByteBlock(const void * buffer, int start_offset, int length)
+  void StormMessageWriter::WriteByteBlock(const void * buffer, int start_offset, std::size_t length)
   {
     int write_offset = m_PacketInfo->m_WriteOffset;
     StormFixedBlockHandle cur_block = m_PacketInfo->m_CurBlock;
     void * ptr = m_Allocator->ResolveHandle(cur_block);
     ptr = Marshal::MemOffset(ptr, write_offset);
-    int init_length = length;
+    std::size_t init_length = (int)length;
 
     while (length > 0)
     {
       int space_avail = m_Allocator->GetBlockSize() - m_ReservedTrailerLength - write_offset;
 
-      int write_len = (space_avail < length ? space_avail : length);
+      int write_len = (space_avail < (int)length ? space_avail : (int)length);
       Marshal::Copy(ptr, start_offset, buffer, write_len);
 
       length -= write_len;
@@ -221,7 +221,7 @@ namespace StormSockets
       }
     }
 
-    m_PacketInfo->m_TotalLength += init_length;
+    m_PacketInfo->m_TotalLength += (int)init_length;
     m_PacketInfo->m_WriteOffset = write_offset;
   }
 

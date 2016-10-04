@@ -17,7 +17,7 @@
 
 namespace StormSockets
 {
-  StormSocketFrontendBase::StormSocketFrontendBase(StormSocketFrontendSettings & settings, StormSocketBackend * backend) :
+  StormSocketFrontendBase::StormSocketFrontendBase(const StormSocketFrontendSettings & settings, StormSocketBackend * backend) :
     m_Allocator(backend->GetAllocator()),
     m_MessageSenders(backend->GetMessageSenders()),
     m_MessageReaders(backend->GetMessageReaders()),
@@ -31,6 +31,12 @@ namespace StormSockets
     m_MaxPendingFrees = backend->GetMaxPendingFrees();
 
     m_OwnedConnections.reserve(settings.MaxConnections);
+  }
+
+  void StormSocketFrontendBase::WaitForEvent(int timeout_ms)
+  {
+    std::unique_lock<std::mutex> lock(m_EventMutex);
+    m_EventCondition.wait_for(lock, std::chrono::milliseconds(timeout_ms));
   }
 
   bool StormSocketFrontendBase::GetEvent(StormSocketEventInfo & message)
@@ -118,7 +124,7 @@ namespace StormSockets
     }
   }
 
-  bool StormSocketFrontendBase::InitServerSSL(StormSocketServerSSLSettings & ssl_settings, StormSocketServerSSLData & ssl_data)
+  bool StormSocketFrontendBase::InitServerSSL(const StormSocketServerSSLSettings & ssl_settings, StormSocketServerSSLData & ssl_data)
   {
     if (ssl_settings.CertificateFile && ssl_settings.PrivateKeyFile != nullptr)
     {
@@ -273,6 +279,8 @@ namespace StormSockets
     {
       std::this_thread::yield();
     }
+
+    m_EventCondition.notify_one();
   }
 
   void StormSocketFrontendBase::QueueHandshakeCompleteEvent(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
@@ -289,6 +297,8 @@ namespace StormSockets
     {
       std::this_thread::yield();
     }
+
+    m_EventCondition.notify_one();
   }
 
   void StormSocketFrontendBase::QueueDisconnectEvent(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
@@ -305,6 +315,8 @@ namespace StormSockets
     {
       std::this_thread::yield();
     }
+
+    m_EventCondition.notify_one();
   }
 
   void StormSocketFrontendBase::ConnectionEstablishComplete(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)

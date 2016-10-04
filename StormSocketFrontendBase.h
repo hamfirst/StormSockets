@@ -64,9 +64,13 @@ namespace StormSockets
     std::mutex m_OwnedConnectionMutex;
     std::unique_lock<std::mutex> m_OwnedConnectionLock;
 
-	public:
-    StormSocketFrontendBase(StormSocketFrontendSettings & settings, StormSocketBackend * backend);
+    std::mutex m_EventMutex;
+    std::condition_variable m_EventCondition;
 
+	public:
+    StormSocketFrontendBase(const StormSocketFrontendSettings & settings, StormSocketBackend * backend);
+
+    void WaitForEvent(int timeout_ms);
 		bool GetEvent(StormSocketEventInfo & message);
 
 		bool SendPacketToConnection(StormMessageWriter & writer, StormSocketConnectionId id);
@@ -82,7 +86,7 @@ namespace StormSockets
     void DisassociateConnectionId(StormSocketConnectionId connection_id);
     void CleanupAllConnections();
 
-    bool InitServerSSL(StormSocketServerSSLSettings & ssl_settings, StormSocketServerSSLData & ssl_data);
+    bool InitServerSSL(const StormSocketServerSSLSettings & ssl_settings, StormSocketServerSSLData & ssl_data);
     void ReleaseServerSSL(StormSocketServerSSLData & ssl_data);
 
     void InitClientSSL(StormSocketClientSSLData & ssl_data);

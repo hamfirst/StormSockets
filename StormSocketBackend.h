@@ -72,7 +72,7 @@ namespace StormSockets
 
     static const int kBufferSetCount = 8;
     typedef std::array<asio::const_buffer, 8> SendBuffer;
-    static const int InvalidSocketId = -1;
+    static const std::size_t InvalidSocketId = -1;
 
     struct AcceptorData
     {
@@ -89,13 +89,13 @@ namespace StormSockets
 
   public:
 
-    StormSocketBackend(StormSocketInitSettings & settings);
+    StormSocketBackend(const StormSocketInitSettings & settings);
     virtual ~StormSocketBackend();
 
-    StormSocketBackendAcceptorId InitAcceptor(StormSocketFrontend * frontend, StormSocketListenData & init_data);
+    StormSocketBackendAcceptorId InitAcceptor(StormSocketFrontend * frontend, const StormSocketListenData & init_data);
     void DestroyAcceptor(StormSocketBackendAcceptorId id);
 
-    StormSocketConnectionId RequestConnect(StormSocketFrontend * frontend, const char * ip_addr, int port, void * init_data);
+    StormSocketConnectionId RequestConnect(StormSocketFrontend * frontend, const char * ip_addr, int port, const void * init_data);
 
     void RequestStop() { m_ThreadStopRequested = true; }
 
@@ -139,11 +139,11 @@ namespace StormSockets
     bool CheckDisconnectFlags(StormSocketConnectionId id, StormSocketDisconnectFlags::Index new_flags);
 
     bool QueueOutgoingPacket(StormMessageWriter & writer, StormSocketConnectionId id);
-    void SignalOutgoingSocket(StormSocketConnectionId id, StormSocketIOOperationType::Index type, int size = 0);
+    void SignalOutgoingSocket(StormSocketConnectionId id, StormSocketIOOperationType::Index type, std::size_t size = 0);
 
   private:
 
-    StormSocketConnectionId AllocateConnection(StormSocketFrontend * frontend, int socket, uint32_t remote_ip, uint16_t remote_port, bool for_connect, void * init_data);
+    StormSocketConnectionId AllocateConnection(StormSocketFrontend * frontend, uint32_t remote_ip, uint16_t remote_port, bool for_connect, const void * init_data);
     void FreeConnectionSlot(StormSocketConnectionId id);
 
     void PrepareToAccept(StormSocketBackendAcceptorId acceptor_id);
