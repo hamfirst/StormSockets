@@ -4,7 +4,7 @@
 
 namespace StormSockets
 {
-  StormSocketClientFrontendHttp::StormSocketClientFrontendHttp(StormSocketClientFrontendHttpSettings & settings, StormSocketBackend * backend) :
+  StormSocketClientFrontendHttp::StormSocketClientFrontendHttp(const StormSocketClientFrontendHttpSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendHttpBase(settings, backend),
     m_ConnectionAllocator(sizeof(StormSocketClientConnectionHttp) * settings.MaxConnections, sizeof(StormSocketClientConnectionHttp), false)
   {
@@ -15,6 +15,33 @@ namespace StormSockets
   {
     CleanupAllConnections();
     ReleaseClientSSL(m_SSLData);
+  }
+
+  StormSocketConnectionId StormSocketClientFrontendHttp::RequestConnect(const char * ip_addr, int port, const StormSocketClientFrontendHttpRequestData & request_data)
+  {
+    return m_Backend->RequestConnect(this, ip_addr, port, &request_data);
+  }
+
+  StormSocketConnectionId StormSocketClientFrontendHttp::RequestConnect(const StormURI & uri)
+  {
+    auto request = m_Backend->CreateHttpRequestWriter("GET", uri.m_Uri.c_str(), uri.m_Host.c_str());
+
+    auto port = atoi(uri.m_Port.c_str());
+    auto connection_id = m_Backend->RequestConnect(this, uri.m_Host.c_str(), port, &request);
+    m_Backend->FreeOutgoingHttpRequest(request);
+
+    return connection_id;
+  }
+
+  StormSocketConnectionId StormSocketClientFrontendHttp::RequestConnect(const char * url)
+  {
+    StormURI uri;
+    if (ParseURI(url, uri) == false)
+    {
+      return StormSocketConnectionId::InvalidConnectionId;
+    }
+
+    return RequestConnect(uri);
   }
 
   void StormSocketClientFrontendHttp::FreeIncomingHttpResponse(StormHttpResponseReader & reader)

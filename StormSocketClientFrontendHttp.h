@@ -4,16 +4,12 @@
 #include "StormSocketConnectionHttp.h"
 #include "StormHttpHeaderValues.h"
 #include "StormHttpRequestWriter.h"
+#include "StormSocketRequest.h"
+#include "StormUrlUtil.h"
 #include "StormSha1.h"
 
 namespace StormSockets
 {
-  struct StormSocketClientFrontendHttpRequestData
-  {
-    StormHttpRequestWriter m_RequestWriter;
-    bool m_UseSSL;
-  };
-
   class StormSocketClientFrontendHttp : public StormSocketFrontendHttpBase
   {
   protected:
@@ -23,8 +19,12 @@ namespace StormSockets
     StormHttpHeaderValues m_HeaderValues;
   public:
 
-    StormSocketClientFrontendHttp(StormSocketClientFrontendHttpSettings & settings, StormSocketBackend * backend);
+    StormSocketClientFrontendHttp(const StormSocketClientFrontendHttpSettings & settings, StormSocketBackend * backend);
     ~StormSocketClientFrontendHttp();
+
+    StormSocketConnectionId RequestConnect(const char * ip_addr, int port, const StormSocketClientFrontendHttpRequestData & request_data);
+    StormSocketConnectionId RequestConnect(const StormURI & uri);
+    StormSocketConnectionId RequestConnect(const char * url);
 
     void FreeIncomingHttpResponse(StormHttpResponseReader & reader);
 

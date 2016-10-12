@@ -253,6 +253,7 @@
     <ClCompile Include="..\External\asio\asio.cpp">
       <Filter>asio</Filter>
     </ClCompile>
+    <ClCompile Include="StormUrlUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StormFixedBlockAllocator.h" />
@@ -1670,5 +1671,7 @@
     <ClInclude Include="..\External\asio\yield.hpp">
       <Filter>asio</Filter>
     </ClInclude>
+    <ClInclude Include="StormSocketRequest.h" />
+    <ClInclude Include="StormUrlUtil.h" />
   </ItemGroup>
 </Project>

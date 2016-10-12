@@ -3,7 +3,7 @@
 
 namespace StormSockets
 {
-  StormSocketFrontendHttpBase::StormSocketFrontendHttpBase(StormSocketFrontendHttpSettings & settings, StormSocketBackend * backend) :
+  StormSocketFrontendHttpBase::StormSocketFrontendHttpBase(const StormSocketFrontendHttpSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendBase(settings, backend)
   {
 

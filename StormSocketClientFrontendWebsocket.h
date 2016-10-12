@@ -4,20 +4,11 @@
 #include "StormSocketConnectionWebsocket.h"
 #include "StormWebsocketHeaderValues.h"
 #include "StormWebsocketMessageWriter.h"
+#include "StormSocketRequest.h"
 #include "StormSha1.h"
 
 namespace StormSockets
 {
-  struct StormSocketClientFrontendWebsocketRequestData
-  {
-    bool m_UseSSL = false;
-    const char * m_Uri = "/";
-    const char * m_Host = "localhost";
-    const char * m_Protocol = nullptr;
-    const char * m_Origin = nullptr;
-  };
-
-
   class StormSocketClientFrontendWebsocket : public StormSocketFrontendWebsocketBase
   {
   protected:

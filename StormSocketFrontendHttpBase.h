@@ -9,7 +9,7 @@ namespace StormSockets
   {
   protected:
 
-    StormSocketFrontendHttpBase(StormSocketFrontendHttpSettings & settings, StormSocketBackend * backend);
+    StormSocketFrontendHttpBase(const StormSocketFrontendHttpSettings & settings, StormSocketBackend * backend);
     bool ProcessHttpData(StormSocketConnectionBase & connection, StormHttpConnectionBase & http_connection, StormSocketConnectionId connection_id);
 
     virtual void AddBodyBlock(StormSocketConnectionId connection_id, StormHttpConnectionBase & http_connection, void * chunk_ptr, int chunk_len, int read_offset) = 0;

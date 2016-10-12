@@ -260,6 +260,10 @@
     </ClCompile>
     <ClCompile Include="StormSocketServerFrontendWebsocket.cpp" />
     <ClCompile Include="StormSocketServerWebsocket.cpp" />
+    <ClCompile Include="StormUrlUtil.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="StormWebsocketHeaderValues.cpp" />
     <ClCompile Include="StormWebsocketMessageReader.cpp" />
     <ClCompile Include="StormWebsocketMessageWriter.cpp" />
@@ -764,6 +768,7 @@
     </ClInclude>
     <ClInclude Include="StormSocketFrontendWebsocketBase.h" />
     <ClInclude Include="StormSocketIOOperation.h" />
+    <ClInclude Include="StormSocketRequest.h" />
     <ClInclude Include="StormSocketServerFrontendHttp.h">
       <SubType>
       </SubType>
@@ -771,6 +776,10 @@
     <ClInclude Include="StormSocketServerFrontendWebsocket.h" />
     <ClInclude Include="StormSocketServerTypes.h" />
     <ClInclude Include="StormSocketServerWebsocket.h" />
+    <ClInclude Include="StormUrlUtil.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="StormWebsocketHeaderValues.h" />
     <ClInclude Include="StormWebsocketMessageReader.h" />
     <ClInclude Include="StormWebsocketMessageWriter.h" />
