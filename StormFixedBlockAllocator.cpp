@@ -90,7 +90,7 @@ namespace StormSockets
 #endif
         if (block_mem == nullptr)
         {
-          throw std::exception("out of memory");
+          throw std::runtime_error("out of memory");
         }
 
         handle = StormFixedBlockHandle{ -1, block_mem };
