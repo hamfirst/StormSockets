@@ -1,5 +1,7 @@
 #include "StormWebsocketHeaderValues.h"
 
+#include <stdexcept>
+
 namespace StormSockets
 {
   StormWebsocketHeaderValues::StormWebsocketHeaderValues(const char * protocol) :

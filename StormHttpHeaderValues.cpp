@@ -1,6 +1,8 @@
 
 #include "StormHttpHeaderValues.h"
 
+#include <stdexcept>
+
 namespace StormSockets
 {
   StormHttpHeaderValues::StormHttpHeaderValues()

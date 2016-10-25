@@ -13,6 +13,8 @@
 #pragma comment(lib, "mswsock.lib")
 #endif
 
+#include <stdexcept>
+
 namespace StormSockets
 {
   StormSocketBackend::StormSocketBackend(const StormSocketInitSettings & settings) :

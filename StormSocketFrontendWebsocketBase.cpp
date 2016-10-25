@@ -1,6 +1,8 @@
 
 #include "StormSocketFrontendWebsocketBase.h"
 
+#include <stdexcept>
+
 namespace StormSockets
 {
 

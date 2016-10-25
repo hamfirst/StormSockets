@@ -2,6 +2,7 @@
 #include "StormSocketFrontendBase.h"
 
 #include <fstream>
+#include <stdexcept>
 
 #ifdef USE_MBED
 
