@@ -153,7 +153,7 @@ namespace StormSockets
         free(handle.m_MallocBlock);
       }
 #else
-      block_mem = free(handle.m_MallocBlock);
+      free(handle.m_MallocBlock);
 #endif
       return block_next;
     }
