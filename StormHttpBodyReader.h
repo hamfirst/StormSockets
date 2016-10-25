@@ -1,7 +1,7 @@
 #pragma once
 
-#include <StormSockets\StormMessageReaderCursor.h>
-#include <StormSockets\StormMessageReaderData.h>
+#include "StormMessageReaderCursor.h"
+#include "StormMessageReaderData.h"
 
 namespace StormSockets
 {

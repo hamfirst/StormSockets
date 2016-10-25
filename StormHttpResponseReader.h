@@ -1,11 +1,11 @@
 #pragma once
 
-#include <StormSockets\StormFixedBlockAllocator.h>
-#include <StormSockets\StormSocketConnectionId.h>
-#include <StormSockets\StormMessageReaderData.h>
-#include <StormSockets\StormMessageReaderCursor.h>
-#include <StormSockets\StormMessageHeaderReader.h>
-#include <StormSockets\StormHttpBodyReader.h>
+#include "StormFixedBlockAllocator.h"
+#include "StormSocketConnectionId.h"
+#include "StormMessageReaderData.h"
+#include "StormMessageReaderCursor.h"
+#include "StormMessageHeaderReader.h"
+#include "StormHttpBodyReader.h"
 
 #include <cstdint>
 

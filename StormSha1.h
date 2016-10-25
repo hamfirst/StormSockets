@@ -4,8 +4,8 @@
 #include <string>
 #include <exception>
 
-#include <StormSockets\StormMessageHeaderReader.h>
-#include <StormSockets\StormMessageWriter.h>
+#include "StormMessageHeaderReader.h"
+#include "StormMessageWriter.h"
 
 namespace StormSockets
 {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <StormSockets\StormMessageWriter.h>
-#include <StormSockets\StormWebsocketMessageReader.h>
-#include <StormSockets\StormHttpResponseReader.h>
-#include <StormSockets\StormHttpRequestReader.h>
+#include "StormMessageWriter.h"
+#include "StormWebsocketMessageReader.h"
+#include "StormHttpResponseReader.h"
+#include "StormHttpRequestReader.h"
 
 #include <thread>
 #include <algorithm>

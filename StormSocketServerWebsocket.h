@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <StormSockets\StormSocketServerTypes.h>
-#include <StormSockets\StormWebsocketMessageWriter.h>
+#include "StormSocketServerTypes.h"
+#include "StormWebsocketMessageWriter.h"
 
 
 namespace StormSockets

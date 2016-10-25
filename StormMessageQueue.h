@@ -1,6 +1,6 @@
 #pragma once
 
-#include <StormSockets\StormGenIndex.h>
+#include "StormGenIndex.h"
 
 #include <atomic>
 #include <memory>

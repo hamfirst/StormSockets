@@ -1,9 +1,9 @@
 #pragma once
 
-#include <StormSockets\StormFixedBlockAllocator.h>
-#include <StormSockets\StormSocketBuffer.h>
-#include <StormSockets\StormMessageWriter.h>
-#include <StormSockets\StormWebsocketMessageReader.h>
+#include "StormFixedBlockAllocator.h"
+#include "StormSocketBuffer.h"
+#include "StormMessageWriter.h"
+#include "StormWebsocketMessageReader.h"
 
 #ifdef USE_MBED
 #include <mbedtls\ssl.h>

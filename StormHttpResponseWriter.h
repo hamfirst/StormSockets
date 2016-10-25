@@ -1,6 +1,6 @@
 #pragma once
 
-#include <StormSockets\StormMessageWriter.h>
+#include "StormMessageWriter.h"
 
 namespace StormSockets
 {

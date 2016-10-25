@@ -1,8 +1,8 @@
 #pragma once
 
-#include <StormSockets\StormFixedBlockAllocator.h>
-#include <StormSockets\StormSocketConnectionId.h>
-#include <StormSockets\StormMessageReaderData.h>
+#include "StormFixedBlockAllocator.h"
+#include "StormSocketConnectionId.h"
+#include "StormMessageReaderData.h"
 
 #include <cstdint>
 

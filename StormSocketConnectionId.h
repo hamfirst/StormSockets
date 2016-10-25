@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <StormSockets\StormGenIndex.h>
+#include "StormGenIndex.h"
 
 namespace StormSockets
 {
