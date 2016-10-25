@@ -86,7 +86,7 @@ namespace StormSockets
           block_mem = malloc(m_MemoryBlockSize);
         }
 #else
-        block_mem = malloc(total_size);
+        block_mem = malloc(m_MemoryBlockSize);
 #endif
         if (block_mem == nullptr)
         {
