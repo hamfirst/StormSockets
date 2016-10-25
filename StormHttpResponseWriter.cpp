@@ -1,6 +1,9 @@
 
 #include "StormHttpResponseWriter.h"
 
+#include <stdio.h>
+#include <string.h>
+
 namespace StormSockets
 {
   static const uint16_t line_ending = 0x0A0D;
