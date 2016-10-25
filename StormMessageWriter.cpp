@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 
+
 namespace StormSockets
 {
   void StormMessageWriter::Init(StormFixedBlockAllocator * block_allocator, StormFixedBlockAllocator * sender_allocator, bool encrypted, int header_length, int trailer_length)
