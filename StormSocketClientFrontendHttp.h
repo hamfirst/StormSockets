@@ -23,8 +23,8 @@ namespace StormSockets
     ~StormSocketClientFrontendHttp();
 
     StormSocketConnectionId RequestConnect(const char * ip_addr, int port, const StormSocketClientFrontendHttpRequestData & request_data);
-    StormSocketConnectionId RequestConnect(const StormURI & uri);
-    StormSocketConnectionId RequestConnect(const char * url);
+    StormSocketConnectionId RequestConnect(const StormURI & uri, const void * body, int body_len, const void * headers, int header_len);
+    StormSocketConnectionId RequestConnect(const char * url, const void * body, int body_len, const void * headers, int header_len);
 
     void FreeIncomingHttpResponse(StormHttpResponseReader & reader);
 

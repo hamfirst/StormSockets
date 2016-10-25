@@ -35,9 +35,9 @@ namespace StormSockets
 
     StormHttpBodyReader GetBodyReader();
 
-    StormMessageReaderCursor GetMethod() { return m_Method; };
-    StormMessageReaderCursor GetURI() { return m_URI; }
-    StormMessageHeaderReader GetHeaderReader() { return m_Headers; }
+    StormMessageReaderCursor & GetMethod() { return m_Method; };
+    StormMessageReaderCursor & GetURI() { return m_URI; }
+    StormMessageHeaderReader & GetHeaderReader() { return m_Headers; }
 
   private:
     StormHttpRequestReader(void * block, int data_len, int read_offset, StormSocketConnectionId connection_id,

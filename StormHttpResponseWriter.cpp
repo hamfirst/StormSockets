@@ -34,7 +34,12 @@ namespace StormSockets
     m_HeaderWriter.WriteInt16(line_ending);
   }
 
-  void StormHttpResponseWriter::WriteBody(void * data, unsigned int len)
+  void StormHttpResponseWriter::WriteHeaders(const void * data, unsigned int len)
+  {
+    m_HeaderWriter.WriteByteBlock(data, 0, len);
+  }
+
+  void StormHttpResponseWriter::WriteBody(const void * data, unsigned int len)
   {
     m_BodyWriter.WriteByteBlock(data, 0, len);
   }
@@ -52,5 +57,11 @@ namespace StormSockets
     }
 
     m_HeaderWriter.WriteInt16(line_ending);
+  }
+
+  void StormHttpResponseWriter::DebugPrint()
+  {
+    m_HeaderWriter.DebugPrint();
+    m_BodyWriter.DebugPrint();
   }
 }

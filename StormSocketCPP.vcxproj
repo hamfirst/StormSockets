@@ -239,6 +239,10 @@
     <ClCompile Include="StormMessageHeaderReader.cpp" />
     <ClCompile Include="StormMessageHeaderValues.cpp" />
     <ClCompile Include="StormMessageReaderCursor.cpp" />
+    <ClCompile Include="StormMessageReaderUtil.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="StormMessageWriter.cpp" />
     <ClCompile Include="StormProfiling.cpp" />
     <ClCompile Include="StormSemaphore.cpp" />
@@ -748,6 +752,10 @@
     <ClInclude Include="StormMessageQueue.h" />
     <ClInclude Include="StormMessageReaderCursor.h" />
     <ClInclude Include="StormMessageReaderData.h" />
+    <ClInclude Include="StormMessageReaderUtil.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="StormMessageWriter.h" />
     <ClInclude Include="StormProfiling.h" />
     <ClInclude Include="StormSemaphore.h" />

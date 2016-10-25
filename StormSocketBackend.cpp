@@ -183,7 +183,7 @@ namespace StormSockets
     {
       asio::ip::tcp::resolver::query resolver_query(ip_addr, std::to_string(port));
 
-      auto resolver_callback = [this, connection_id](asio::error_code ec, asio::ip::tcp::resolver::iterator itr)
+      auto resolver_callback = [this, connection_id, port](asio::error_code ec, asio::ip::tcp::resolver::iterator itr)
       {
         if (!ec)
         {
@@ -193,7 +193,8 @@ namespace StormSockets
             
             if (ep.protocol() == ep.protocol().v4())
             {
-              PrepareToConnect(connection_id, *itr);
+
+              PrepareToConnect(connection_id, asio::ip::tcp::endpoint(ep.address(), port));
               return;
             }
 
@@ -829,7 +830,7 @@ namespace StormSockets
     {
       if (!ec)
       {
-        FinalizeConnect(id);
+        FinalizeSteamValidation(id);
       }
       else
       {
@@ -840,7 +841,7 @@ namespace StormSockets
     m_ClientSockets[id]->async_connect(endpoint, connect_callback);
   }
 
-  void StormSocketBackend::FinalizeConnect(StormSocketConnectionId id)
+  void StormSocketBackend::FinalizeSteamValidation(StormSocketConnectionId id)
   {
     auto & connection = GetConnection(id);
 
@@ -1405,7 +1406,7 @@ namespace StormSockets
     {
       m_CloseConnectionSemaphore.WaitOne();
 
-      if (m_ClosingConnectionQueue.TryDequeue(id) == false)
+      while (m_ClosingConnectionQueue.TryDequeue(id))
       {
         CloseSocket(id);
         SetSocketDisconnected(id);

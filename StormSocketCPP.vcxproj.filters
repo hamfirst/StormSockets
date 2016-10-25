@@ -254,6 +254,7 @@
       <Filter>asio</Filter>
     </ClCompile>
     <ClCompile Include="StormUrlUtil.cpp" />
+    <ClCompile Include="StormMessageReaderUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StormFixedBlockAllocator.h" />
@@ -1673,5 +1674,6 @@
     </ClInclude>
     <ClInclude Include="StormSocketRequest.h" />
     <ClInclude Include="StormUrlUtil.h" />
+    <ClInclude Include="StormMessageReaderUtil.h" />
   </ItemGroup>
 </Project>

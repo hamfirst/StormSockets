@@ -55,6 +55,7 @@ namespace StormSockets
   public:
 
     int GetLength();
+    void DebugPrint();
 
     void WriteByte(uint8_t b);
     void WriteUTF8Char(wchar_t c);

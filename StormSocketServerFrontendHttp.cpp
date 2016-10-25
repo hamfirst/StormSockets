@@ -5,7 +5,7 @@
 
 namespace StormSockets
 {
-  StormSocketServerFrontendHttp::StormSocketServerFrontendHttp(StormSocketServerFrontendHttpSettings & settings, StormSocketBackend * backend) :
+  StormSocketServerFrontendHttp::StormSocketServerFrontendHttp(const StormSocketServerFrontendHttpSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendHttpBase(settings, backend),
     m_HeaderValues(),
     m_ConnectionAllocator(sizeof(StormSocketServerConnectionHttp) * settings.MaxConnections, sizeof(StormSocketServerConnectionHttp), false)
@@ -23,6 +23,26 @@ namespace StormSockets
     {
       ReleaseServerSSL(m_SSLData);
     }
+  }
+
+  StormHttpResponseWriter StormSocketServerFrontendHttp::CreateOutgoingResponse(int response_code, char * response_phrase)
+  {
+    return m_Backend->CreateHttpResponseWriter(response_code, response_phrase);
+  }
+
+  void StormSocketServerFrontendHttp::FinalizeOutgoingResponse(StormHttpResponseWriter & writer, bool write_content_length)
+  {
+    writer.FinalizeHeaders(write_content_length);
+  }
+
+  void StormSocketServerFrontendHttp::SendResponse(StormSocketConnectionId connection_id, StormHttpResponseWriter & writer)
+  {
+    m_Backend->SendHttpResponseToConnection(writer, connection_id);
+  }
+
+  void StormSocketServerFrontendHttp::FreeOutgoingResponse(StormHttpResponseWriter & writer)
+  {
+    m_Backend->FreeOutgoingHttpResponse(writer);
   }
 
   StormSocketServerConnectionHttp & StormSocketServerFrontendHttp::GetHttpConnection(StormSocketFrontendConnectionId id)

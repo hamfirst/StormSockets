@@ -40,6 +40,29 @@ namespace StormSockets
     return m_PacketInfo->m_TotalLength;
   }
 
+  void StormMessageWriter::DebugPrint()
+  {
+    StormFixedBlockHandle block_handle = m_PacketInfo->m_StartBlock;
+    int len = m_PacketInfo->m_TotalLength;
+
+    while (len > 0)
+    {
+      int block_len = m_Allocator->GetBlockSize();
+      char * ptr = (char *)m_Allocator->ResolveHandle(block_handle);
+
+      while (len > 0 && block_len > 0)
+      {
+        putc(*ptr, stdout);
+        ptr++;
+
+        len--;
+        block_len--;
+      }
+      
+      block_handle = m_Allocator->GetNextBlock(block_handle);
+    }
+  }
+
   void StormMessageWriter::WriteByte(uint8_t b)
   {
     uint64_t prof = Profiling::StartProfiler();

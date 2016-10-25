@@ -259,7 +259,7 @@ namespace StormSockets
     {
       while (data_length > 0)
       {
-        unsigned int data_avail = m_FixedBlockSize - m_PacketInfo->m_ReadOffset;
+        unsigned int data_avail = m_FixedBlockSize - read_offset;
 
         if (data_avail > length)
         {

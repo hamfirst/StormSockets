@@ -20,9 +20,12 @@ namespace StormSockets
     StormHttpResponseWriter & operator =(StormHttpResponseWriter && rhs) = default;
 
     void WriteHeader(const char * str);
-    void WriteBody(void * data, unsigned int len);
+    void WriteHeaders(const void * data, unsigned int len);
+    void WriteBody(const void * data, unsigned int len);
 
     void FinalizeHeaders(bool write_content_len = true);
+
+    void DebugPrint();
 
     StormMessageWriter & GetHeaderWriter() { return m_HeaderWriter; }
     StormMessageWriter & GetBodyWriter() { return m_BodyWriter; }

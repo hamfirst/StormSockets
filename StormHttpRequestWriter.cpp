@@ -31,9 +31,14 @@ namespace StormSockets
     m_HeaderWriter.WriteInt16(line_ending);
   }
 
-  void StormHttpRequestWriter::WriteBody(void * data, unsigned int len)
+  void StormHttpRequestWriter::WriteBody(const void * data, unsigned int len)
   {
     m_BodyWriter.WriteByteBlock(data, 0, len);
+  }
+
+  void StormHttpRequestWriter::WriteHeaders(const void * data, unsigned int len)
+  {
+    m_HeaderWriter.WriteByteBlock(data, 0, len);
   }
 
   void StormHttpRequestWriter::FinalizeHeaders(bool write_content_len)

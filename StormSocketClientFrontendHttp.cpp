@@ -22,18 +22,34 @@ namespace StormSockets
     return m_Backend->RequestConnect(this, ip_addr, port, &request_data);
   }
 
-  StormSocketConnectionId StormSocketClientFrontendHttp::RequestConnect(const StormURI & uri)
+  StormSocketConnectionId StormSocketClientFrontendHttp::RequestConnect(const StormURI & uri, const void * body, int body_len, const void * headers, int header_len)
   {
-    auto request = m_Backend->CreateHttpRequestWriter("GET", uri.m_Uri.c_str(), uri.m_Host.c_str());
+    auto writer = m_Backend->CreateHttpRequestWriter(body_len != 0 ? "POST" : "GET", uri.m_Uri.c_str(), uri.m_Host.c_str());
+    StormSocketClientFrontendHttpRequestData request_data{ writer, (uri.m_Protocol == "https") };
+    request_data.m_RequestWriter.WriteBody(body, body_len);
+    request_data.m_RequestWriter.WriteHeaders(headers, header_len);
+    request_data.m_RequestWriter.FinalizeHeaders();
 
     auto port = atoi(uri.m_Port.c_str());
-    auto connection_id = m_Backend->RequestConnect(this, uri.m_Host.c_str(), port, &request);
-    m_Backend->FreeOutgoingHttpRequest(request);
+    if (port == 0)
+    {
+      if (uri.m_Protocol == "http")
+      {
+        port = 80;
+      }
+      else if (uri.m_Protocol == "https")
+      {
+        port = 443;
+      }
+    }
+
+    auto connection_id = m_Backend->RequestConnect(this, uri.m_Host.c_str(), port, &request_data);
+    m_Backend->FreeOutgoingHttpRequest(request_data.m_RequestWriter);
 
     return connection_id;
   }
 
-  StormSocketConnectionId StormSocketClientFrontendHttp::RequestConnect(const char * url)
+  StormSocketConnectionId StormSocketClientFrontendHttp::RequestConnect(const char * url, const void * body, int body_len, const void * headers, int header_len)
   {
     StormURI uri;
     if (ParseURI(url, uri) == false)
@@ -41,7 +57,7 @@ namespace StormSockets
       return StormSocketConnectionId::InvalidConnectionId;
     }
 
-    return RequestConnect(uri);
+    return RequestConnect(uri, body, body_len, headers, header_len);
   }
 
   void StormSocketClientFrontendHttp::FreeIncomingHttpResponse(StormHttpResponseReader & reader)
@@ -187,7 +203,7 @@ namespace StormSockets
             {
               http_connection.m_Chunked = true;
             }
-            else if (m_HeaderValues.MatchExact(cur_header, header_val_lowercase, StormHttpHeaderType::ContentLength))
+            else if (m_HeaderValues.Match(cur_header, header_val_lowercase, StormHttpHeaderType::ContentLength))
             {
               if (cur_header.ReadNumber(http_connection.m_BodyLength) == false)
               {

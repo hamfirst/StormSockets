@@ -203,7 +203,7 @@ namespace StormSockets
     value = 0;
     while (reader_copy.GetRemainingLength() > 0)
     {
-      if (required_digits)
+      if (required_digits >= 0)
       {
         required_digits--;
         if (required_digits < 0)
@@ -228,6 +228,15 @@ namespace StormSockets
         *this = prev_reader;
         return true;
       }
+    }
+
+    if (required_digits <= 0)
+    {
+      value *= 10;
+      value += digit - '0';
+
+      *this = reader_copy;
+      return true;
     }
 
     return false;

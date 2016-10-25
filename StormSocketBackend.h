@@ -150,7 +150,7 @@ namespace StormSockets
     void AcceptNewConnection(const asio::error_code& error, StormSocketBackendAcceptorId acceptor_id);
 
     void PrepareToConnect(StormSocketConnectionId id, asio::ip::tcp::endpoint endpoint);
-    void FinalizeConnect(StormSocketConnectionId id);
+    void FinalizeSteamValidation(StormSocketConnectionId id);
     void ConnectFailed(StormSocketConnectionId id);
 
     void ProcessNewData(StormSocketConnectionId connection_id, const asio::error_code & error, std::size_t bytes_received);
