@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-#include <hash\Hash.h>
+#include <hash/Hash.h>
 
 namespace StormSockets
 {

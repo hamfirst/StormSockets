@@ -4,7 +4,7 @@
 #include <random>
 #include <chrono>
 
-#include <hash\Hash.h>
+#include <hash/Hash.h>
 
 namespace StormSockets
 {

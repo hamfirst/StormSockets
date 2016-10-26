@@ -6,7 +6,7 @@
 #include "StormWebsocketMessageReader.h"
 
 #ifdef USE_MBED
-#include <mbedtls\ssl.h>
+#include <mbedtls/ssl.h>
 #endif
 
 namespace StormSockets
