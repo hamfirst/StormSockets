@@ -946,12 +946,12 @@ namespace StormSockets
 
     if (!error)
     {
+#ifdef USE_MBED
       if (connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
       {
         connection.m_DecryptBuffer.GotData((int)bytes_received);
         while (connection.m_SSLContext.m_SSLHandshakeComplete == false)
         {
-#ifdef USE_MBED
           int ec = mbedtls_ssl_handshake(&connection.m_SSLContext.m_SSLContext);
 
           char error_str[1024];
@@ -979,10 +979,10 @@ namespace StormSockets
           {
             break;
           }
-#endif
         }
       }
       else
+#endif
       {
         // Data just goes directly into the recv buffer
         connection.m_UnparsedDataLength.fetch_add((int)bytes_received);
@@ -1089,7 +1089,11 @@ namespace StormSockets
   {
     auto & connection = GetConnection(connection_id);
 
+#ifdef USE_MBED
     StormSocketBuffer * buffer = connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId) ? &connection.m_DecryptBuffer : &connection.m_RecvBuffer;
+#else
+    StormSocketBuffer * buffer = &connection.m_RecvBuffer
+#endif
 
     void * buffer_start =
       Marshal::MemOffset(m_Allocator.ResolveHandle(buffer->m_BlockCur), buffer->m_WriteOffset);
@@ -1216,6 +1220,7 @@ namespace StormSockets
           {
             StormSocketFreeQueueElement free_queue_elem;
 
+#ifdef USE_MBED
             if (writer.m_IsEncrypted == false && connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
             {
               StormMessageWriter encrypted = EncryptWriter(connection_id, writer);
@@ -1225,6 +1230,7 @@ namespace StormSockets
 
               writer = encrypted;
             }
+#endif
 
             int buffer_count = 0;
             int packet_count = 0;
@@ -1253,6 +1259,7 @@ namespace StormSockets
                 break;
               }
 
+#ifdef USE_MBED
               if (writer.m_IsEncrypted == false && connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
               {
                 StormMessageWriter encrypted = EncryptWriter(connection_id, writer);
@@ -1262,6 +1269,7 @@ namespace StormSockets
 
                 writer = encrypted;
               }
+#endif
             }
 
             int advance_count;
