@@ -78,7 +78,7 @@ namespace StormSockets
 			m_Tail = 0;
 			m_Head = 0;
 
-			for (int index = 0; index < m_Queue.Length; index++)
+			for (int index = 0; index < m_Length; index++)
 			{
 				m_Queue[index] = -1;
 			}
@@ -234,7 +234,7 @@ namespace StormSockets
 				}
 
 				StormGenIndex new_index = StormGenIndex(1, gen);
-				if (std::atomic_compare_exchange_weak((std::atomic_int *)&array[index].HasData.Raw, (int *)&gen_index.Raw, new_index.Raw))
+				if (std::atomic_compare_exchange_weak((std::atomic_int *)&array[index].HasData.Raw, (int *)&gen_index.Raw, (int)new_index.Raw))
 				{
 					Profiling::EndProfiler(prof, ProfilerCategory::kAllocArraySlot);
 					return index;
@@ -253,7 +253,7 @@ namespace StormSockets
 				StormGenIndex data_marker = array[message_index].HasData;
 				StormGenIndex new_index = StormGenIndex(0, data_marker.GetGen());
 
-				if (std::atomic_compare_exchange_weak((std::atomic_int *)&array[message_index].HasData.Raw, (int *)&data_marker.Raw, new_index.Raw))
+				if (std::atomic_compare_exchange_weak((std::atomic_int *)&array[message_index].HasData.Raw, (int *)&data_marker.Raw, (int)new_index.Raw))
 				{
 					Profiling::EndProfiler(prof, ProfilerCategory::kReleaseArraySlot);
 					return;
@@ -313,7 +313,7 @@ namespace StormSockets
 					continue;
 				}
 
-				if (std::atomic_compare_exchange_weak((std::atomic_int *)&queue[idx].Raw, (int *)&prev_queue_index.Raw, new_queue_index.Raw))
+				if (std::atomic_compare_exchange_weak((std::atomic_int *)&queue[idx].Raw, (int *)&prev_queue_index.Raw, (int)new_queue_index.Raw))
 				{
 					// Finally, advance the queue head by one
 					while (true)
@@ -331,7 +331,7 @@ namespace StormSockets
 							return false;
 						}
 
-						if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head.Raw, (int *)&old_head.Raw, new_index.Raw))
+						if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head.Raw, (int *)&old_head.Raw, (int)new_index.Raw))
 						{
 							Profiling::EndProfiler(prof, ProfilerCategory::kEnqueue);
 							return true;
@@ -343,7 +343,7 @@ namespace StormSockets
 
 		bool HasData()
 		{
-			return m_Tail != m_Head.Index;
+			return m_Tail != m_Head.GetIndex();
 		}
 
 		bool TryDequeue(T & output, int gen, StormGenIndex * queue, StormMessageMegaContainer<T> * array)
@@ -523,7 +523,7 @@ namespace StormSockets
 					StormGenIndex old_index = array[index].HasData;
 					StormGenIndex new_index = StormGenIndex(old_index.GetIndex(), new_gen);
 
-					if (std::atomic_compare_exchange_weak((std::atomic_int *)&array[index].HasData.Raw, (int *)&old_index.Raw, new_index.Raw))
+					if (std::atomic_compare_exchange_weak((std::atomic_int *)&array[index].HasData.Raw, (int *)&old_index.Raw, (int)new_index.Raw))
 					{
 						break;
 					}

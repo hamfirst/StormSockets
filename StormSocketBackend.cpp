@@ -135,7 +135,7 @@ namespace StormSockets
 
     int acceptor_id = m_NextAcceptorId;
     m_NextAcceptorId++;
-    auto & acceptor_pair = m_Acceptors.emplace(acceptor_id, std::move(new_acceptor));
+    auto & acceptor_pair = m_Acceptors.emplace(std::make_pair(acceptor_id, std::move(new_acceptor)));
     auto & acceptor = acceptor_pair.first->second;
 
     asio::ip::tcp::endpoint endpoint(asio::ip::address_v4::from_string(init_data.LocalInterface), init_data.Port);
@@ -696,7 +696,7 @@ namespace StormSockets
   void StormSocketBackend::PrepareToAccept(StormSocketBackendAcceptorId acceptor_id)
   {
     std::lock_guard<std::mutex> guard(m_AcceptorLock);
-    auto & acceptor_itr = m_Acceptors.find(acceptor_id);
+    auto acceptor_itr = m_Acceptors.find(acceptor_id);
     if (acceptor_itr == m_Acceptors.end())
     {
       return;
@@ -717,7 +717,7 @@ namespace StormSockets
   {
     std::unique_lock<std::mutex> guard(m_AcceptorLock);
 
-    auto & acceptor_itr = m_Acceptors.find(acceptor_id);
+    auto acceptor_itr = m_Acceptors.find(acceptor_id);
     if (acceptor_itr == m_Acceptors.end())
     {
       return;
@@ -847,9 +847,9 @@ namespace StormSockets
   {
     auto & connection = GetConnection(id);
 
-#ifdef USE_MBED
     if (connection.m_Frontend->UseSSL(id, connection.m_FrontendId))
     {
+#ifdef USE_MBED
       auto ssl_config = connection.m_Frontend->GetSSLConfig();
 
       mbedtls_ssl_init(&connection.m_SSLContext.m_SSLContext);
@@ -921,8 +921,8 @@ namespace StormSockets
         FreeOutgoingPacket(connection.m_EncryptWriter);
         connection.m_EncryptWriter = CreateWriter(true);
       }
-#endif
     }
+#endif
     else
     {
       connection.m_Frontend->ConnectionEstablishComplete(id, connection.m_FrontendId);
