@@ -495,7 +495,7 @@ namespace StormSockets
 				StormDoubleGenIndex old_index = m_Head;
 				StormDoubleGenIndex new_index = StormDoubleGenIndex(old_index.GetIndex(), new_gen, old_index.GetGen2());
 
-				if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head.Raw, (int *)&old_index.Raw, new_index.Raw))
+				if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head.Raw, (int *)&old_index.Raw, (int)new_index.Raw))
 				{
 					break;
 				}
@@ -509,7 +509,7 @@ namespace StormSockets
 					StormGenIndex old_index = queue[index];
 					StormGenIndex new_index = StormGenIndex(old_index.GetIndex(), new_gen);
 
-					if (std::atomic_compare_exchange_weak((std::atomic_int *)&queue[index].Raw, (int *)&old_index.Raw, new_index.Raw))
+					if (std::atomic_compare_exchange_weak((std::atomic_int *)&queue[index].Raw, (int *)&old_index.Raw, (int)new_index.Raw))
 					{
 						break;
 					}

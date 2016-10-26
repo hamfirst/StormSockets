@@ -135,7 +135,7 @@ namespace StormSockets
 
     int acceptor_id = m_NextAcceptorId;
     m_NextAcceptorId++;
-    auto & acceptor_pair = m_Acceptors.emplace(std::make_pair(acceptor_id, std::move(new_acceptor)));
+    auto acceptor_pair = m_Acceptors.emplace(std::make_pair(acceptor_id, std::move(new_acceptor)));
     auto & acceptor = acceptor_pair.first->second;
 
     asio::ip::tcp::endpoint endpoint(asio::ip::address_v4::from_string(init_data.LocalInterface), init_data.Port);
@@ -743,9 +743,9 @@ namespace StormSockets
 
     auto & connection = GetConnection(connection_id);
 
+#ifdef USE_MBED
     if (acceptor.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
     {
-#ifdef USE_MBED
 
       auto ssl_config = acceptor.m_Frontend->GetSSLConfig();
 
@@ -806,9 +806,9 @@ namespace StormSockets
         recv_callback,
         recv_timeout_callback);
 
-#endif
     }
     else
+#endif
     {
       connection.m_Frontend->ConnectionEstablishComplete(connection_id, connection.m_FrontendId);
     }
@@ -847,9 +847,9 @@ namespace StormSockets
   {
     auto & connection = GetConnection(id);
 
+#ifdef USE_MBED
     if (connection.m_Frontend->UseSSL(id, connection.m_FrontendId))
     {
-#ifdef USE_MBED
       auto ssl_config = connection.m_Frontend->GetSSLConfig();
 
       mbedtls_ssl_init(&connection.m_SSLContext.m_SSLContext);
@@ -922,8 +922,8 @@ namespace StormSockets
         connection.m_EncryptWriter = CreateWriter(true);
       }
     }
-#endif
     else
+#endif
     {
       connection.m_Frontend->ConnectionEstablishComplete(id, connection.m_FrontendId);
     }
@@ -1045,9 +1045,9 @@ namespace StormSockets
       return false;
     }
 
+#ifdef USE_MBED
     if (connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
     {
-#ifdef USE_MBED
       auto prof = ProfileScope(ProfilerCategory::kSSLDecrypt);
       while (true)
       {
@@ -1076,8 +1076,8 @@ namespace StormSockets
         connection.m_UnparsedDataLength.fetch_add(ret);
         connection.m_RecvBuffer.GotData(ret);
       }
-#endif
     }
+#endif
 
     bool success = connection.m_Frontend->ProcessData(connection_id, connection.m_FrontendId);
 
