@@ -1092,7 +1092,7 @@ namespace StormSockets
 #ifdef USE_MBED
     StormSocketBuffer * buffer = connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId) ? &connection.m_DecryptBuffer : &connection.m_RecvBuffer;
 #else
-    StormSocketBuffer * buffer = &connection.m_RecvBuffer
+    StormSocketBuffer * buffer = &connection.m_RecvBuffer;
 #endif
 
     void * buffer_start =
