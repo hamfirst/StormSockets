@@ -4,8 +4,8 @@
 #include <fstream>
 
 #ifdef USE_MBED
-#include "mbedtls\error.h"
-#include "mbedtls\debug.h"
+#include "mbedtls/error.h"
+#include "mbedtls/debug.h"
 #endif
 
 #ifdef _WINDOWS
