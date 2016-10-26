@@ -109,7 +109,7 @@ namespace StormSockets
 
     StormMessageWriter CreateWriter(bool is_encrypted = false);
     StormHttpRequestWriter CreateHttpRequestWriter(const char * method, const char * uri, const char * host);
-    StormHttpResponseWriter CreateHttpResponseWriter(int response_code, char * response_phrase);
+    StormHttpResponseWriter CreateHttpResponseWriter(int response_code, const char * response_phrase);
     void ReferenceOutgoingHttpRequest(StormHttpRequestWriter & writer);
     void ReferenceOutgoingHttpResponse(StormHttpResponseWriter & writer);
     void FreeOutgoingHttpRequest(StormHttpRequestWriter & writer);

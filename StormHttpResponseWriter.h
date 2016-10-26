@@ -12,7 +12,7 @@ namespace StormSockets
     friend class StormSocketBackend;
 
   public:
-    StormHttpResponseWriter(int response_code, char * response_phrase, StormMessageWriter & header_writer, StormMessageWriter & body_writer);
+    StormHttpResponseWriter(int response_code, const char * response_phrase, StormMessageWriter & header_writer, StormMessageWriter & body_writer);
     StormHttpResponseWriter(const StormHttpResponseWriter & rhs) = default;
     StormHttpResponseWriter(StormHttpResponseWriter && rhs) = default;
 

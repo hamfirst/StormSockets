@@ -25,7 +25,7 @@ namespace StormSockets
     }
   }
 
-  StormHttpResponseWriter StormSocketServerFrontendHttp::CreateOutgoingResponse(int response_code, char * response_phrase)
+  StormHttpResponseWriter StormSocketServerFrontendHttp::CreateOutgoingResponse(int response_code, const char * response_phrase)
   {
     return m_Backend->CreateHttpResponseWriter(response_code, response_phrase);
   }

@@ -12,7 +12,7 @@ namespace StormSockets
   static const char * host_header = "Host: ";
   static const char * content_len = "Content-Length: ";
 
-  StormHttpResponseWriter::StormHttpResponseWriter(int response_code, char * response_phrase, StormMessageWriter & header_writer, StormMessageWriter & body_writer)
+  StormHttpResponseWriter::StormHttpResponseWriter(int response_code, const char * response_phrase, StormMessageWriter & header_writer, StormMessageWriter & body_writer)
   {
     m_HeaderWriter = header_writer;
     m_BodyWriter = body_writer;

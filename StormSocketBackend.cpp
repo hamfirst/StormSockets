@@ -240,7 +240,7 @@ namespace StormSockets
     return writer;
   }
 
-  StormHttpResponseWriter StormSocketBackend::CreateHttpResponseWriter(int response_code, char * response_phrase)
+  StormHttpResponseWriter StormSocketBackend::CreateHttpResponseWriter(int response_code, const char * response_phrase)
   {
     auto header_writer = CreateWriter();
     auto body_writer = CreateWriter();

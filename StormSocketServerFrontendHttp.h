@@ -29,7 +29,7 @@ namespace StormSockets
     mbedtls_ssl_config * GetSSLConfig() { return &m_SSLData.m_SSLConfig; }
 #endif
 
-    StormHttpResponseWriter CreateOutgoingResponse(int response_code, char * response_phrase);
+    StormHttpResponseWriter CreateOutgoingResponse(int response_code, const char * response_phrase);
     void FinalizeOutgoingResponse(StormHttpResponseWriter & writer, bool write_content_length);
     void SendResponse(StormSocketConnectionId connection_id, StormHttpResponseWriter & writer);
     void FreeOutgoingResponse(StormHttpResponseWriter & writer);
