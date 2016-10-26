@@ -6,12 +6,14 @@
 
 #ifdef USE_MBED
 
+#ifdef _WINDOWS
 #include <sspi.h>
 #include <schnlsp.h>
 #include <ntsecapi.h>
 
 #pragma comment(lib, "Crypt32.lib")
 #pragma comment(lib, "Secur32.lib")
+#endif
 
 #define MBED_CHECK_ERROR if(error < 0) throw std::runtime_error("Certificate load error " + std::to_string(error));
 #endif
