@@ -140,6 +140,9 @@ namespace StormSockets
 
     asio::ip::tcp::endpoint endpoint(asio::ip::address_v4::from_string(init_data.LocalInterface), init_data.Port);
     acceptor.m_Acceptor.open(asio::ip::tcp::v4());
+    asio::socket_base::reuse_address option(true);
+    acceptor.m_Acceptor.set_option(option);
+
     acceptor.m_Acceptor.bind(endpoint);
     acceptor.m_Acceptor.listen();
 
