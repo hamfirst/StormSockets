@@ -16,7 +16,7 @@ namespace StormSockets
 {
   struct StormSocketServerSSLData
   {
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
 
     mbedtls_x509_crt m_Cert;
     mbedtls_pk_context m_PrivateKey;
@@ -31,7 +31,7 @@ namespace StormSockets
 
   struct StormSocketClientSSLData
   {
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     mbedtls_x509_crt m_CA;
     mbedtls_entropy_context m_Entropy;
     mbedtls_ctr_drbg_context m_CtrDrbg;

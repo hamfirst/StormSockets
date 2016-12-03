@@ -28,7 +28,7 @@ namespace StormSockets
     return m_Backend->RequestConnect(this, ip_addr, port, &request_data);
   }
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
   bool StormSocketClientFrontendWebsocket::UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
   {
     auto & ws_connection = GetWSConnection(frontend_id);

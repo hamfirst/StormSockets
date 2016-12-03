@@ -65,7 +65,7 @@ namespace StormSockets
     m_Backend->DiscardReaderData(reader.m_ConnectionId, reader.m_FullDataLen);
   }
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
   bool StormSocketClientFrontendHttp::UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
   {
     auto & http_connection = GetHttpConnection(frontend_id);

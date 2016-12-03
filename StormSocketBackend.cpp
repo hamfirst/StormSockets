@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
 #include "mbedtls/error.h"
 #include "mbedtls/debug.h"
 #endif
@@ -223,6 +223,16 @@ namespace StormSockets
   bool StormSocketBackend::QueueOutgoingPacket(StormMessageWriter & writer, StormSocketConnectionId id)
   {
     return m_OutputQueue[id].Enqueue(writer, id.GetGen(), m_OutputQueueIncdices.get(), m_OutputQueueArray.get());
+  }
+
+  StormSocketConnectionBase & StormSocketBackend::GetConnection(int index)
+  {
+    if (index >= m_MaxConnections)
+    {
+      throw std::runtime_error("Invalid connection id");
+    }
+
+    return m_Connections[index];
   }
 
   StormMessageWriter StormSocketBackend::CreateWriter(bool is_encrypted)
@@ -604,7 +614,7 @@ namespace StormSockets
     auto & connection = GetConnection(id);
     if ((new_flags & StormSocketDisconnectFlags::kAllFlags) == StormSocketDisconnectFlags::kAllFlags)
     {
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
       FreeOutgoingPacket(connection.m_EncryptWriter);
 #endif
 
@@ -663,7 +673,7 @@ namespace StormSockets
         connection.m_FailedConnection = false;
 
         connection.m_RecvBuffer.InitBuffers();
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
         connection.m_EncryptWriter = CreateWriter(true);
 #endif
 
@@ -746,7 +756,7 @@ namespace StormSockets
 
     auto & connection = GetConnection(connection_id);
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     if (acceptor.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
     {
 
@@ -826,6 +836,7 @@ namespace StormSockets
     if ((connection.m_DisconnectFlags & StormSocketDisconnectFlags::kAllFlags) != 0)
     {
       SetDisconnectFlag(id, StormSocketDisconnectFlags::kConnectFinished);
+      SetDisconnectFlag(id, StormSocketDisconnectFlags::kRecvThread);
       return;
     }
 
@@ -850,7 +861,7 @@ namespace StormSockets
   {
     auto & connection = GetConnection(id);
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     if (connection.m_Frontend->UseSSL(id, connection.m_FrontendId))
     {
       auto ssl_config = connection.m_Frontend->GetSSLConfig();
@@ -941,6 +952,7 @@ namespace StormSockets
   {
     SetSocketDisconnected(id);
     SetDisconnectFlag(id, StormSocketDisconnectFlags::kConnectFinished);
+    SetDisconnectFlag(id, StormSocketDisconnectFlags::kRecvThread);
   }
 
   void StormSocketBackend::ProcessNewData(StormSocketConnectionId connection_id, const asio::error_code & error, std::size_t bytes_received)
@@ -949,7 +961,7 @@ namespace StormSockets
 
     if (!error)
     {
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
       if (connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
       {
         connection.m_DecryptBuffer.GotData((int)bytes_received);
@@ -1048,7 +1060,7 @@ namespace StormSockets
       return false;
     }
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     if (connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
     {
       auto prof = ProfileScope(ProfilerCategory::kSSLDecrypt);
@@ -1092,7 +1104,7 @@ namespace StormSockets
   {
     auto & connection = GetConnection(connection_id);
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     StormSocketBuffer * buffer = connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId) ? &connection.m_DecryptBuffer : &connection.m_RecvBuffer;
 #else
     StormSocketBuffer * buffer = &connection.m_RecvBuffer;
@@ -1223,7 +1235,7 @@ namespace StormSockets
           {
             StormSocketFreeQueueElement free_queue_elem;
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
             if (writer.m_IsEncrypted == false && connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
             {
               StormMessageWriter encrypted = EncryptWriter(connection_id, writer);
@@ -1262,7 +1274,7 @@ namespace StormSockets
                 break;
               }
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
               if (writer.m_IsEncrypted == false && connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
               {
                 StormMessageWriter encrypted = EncryptWriter(connection_id, writer);
@@ -1372,7 +1384,7 @@ namespace StormSockets
   StormMessageWriter StormSocketBackend::EncryptWriter(StormSocketConnectionId connection_id, StormMessageWriter & writer)
   {
     auto prof = ProfileScope(ProfilerCategory::kSSLEncrypt);
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     auto & connection = GetConnection(connection_id);
     StormFixedBlockHandle cur_block = writer.m_PacketInfo->m_StartBlock;
 
@@ -1450,7 +1462,7 @@ namespace StormSockets
 
   void StormSocketBackend::FreeConnectionResources(StormSocketConnectionId id)
   {
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     auto & connection = GetConnection(id);
 
     if (connection.m_Frontend->UseSSL(id, connection.m_FrontendId))

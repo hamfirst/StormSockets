@@ -4,7 +4,7 @@
 #include <fstream>
 #include <stdexcept>
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
 
 #ifdef _WINDOWS
 #include <sspi.h>
@@ -74,8 +74,11 @@ namespace StormSockets
 
   void StormSocketFrontendBase::ForceDisconnect(StormSocketConnectionId id)
   {
-    m_Backend->SetDisconnectFlag(id, StormSocketDisconnectFlags::kLocalClose);
-    m_Backend->SetDisconnectFlag(id, StormSocketDisconnectFlags::kRemoteClose);
+    if (id != StormSocketConnectionId::InvalidConnectionId)
+    {
+      m_Backend->SetDisconnectFlag(id, StormSocketDisconnectFlags::kLocalClose);
+      m_Backend->SetDisconnectFlag(id, StormSocketDisconnectFlags::kRemoteClose);
+    }
   }
 
   void StormSocketFrontendBase::AssociateConnectionId(StormSocketConnectionId connection_id)
@@ -107,7 +110,8 @@ namespace StormSockets
   void StormSocketFrontendBase::CleanupAllConnections()
   {
     m_OwnedConnectionLock.lock();
-    for (auto connection_id : m_OwnedConnections)
+    auto connections = std::move(m_OwnedConnections);
+    for (auto connection_id : connections)
     {
       ForceDisconnect(connection_id);
       FinalizeConnection(connection_id);
@@ -119,9 +123,9 @@ namespace StormSockets
       m_OwnedConnectionLock.lock();
       if (m_OwnedConnections.size() == 0)
       {
+        m_OwnedConnectionLock.unlock();
         return;
       }
-      m_OwnedConnectionLock.unlock();
 
       std::this_thread::yield();
     }
@@ -153,7 +157,7 @@ namespace StormSockets
       key_data[key_file_length] = 0;
       key_file.close();
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
 
       int error;
 
@@ -202,7 +206,7 @@ namespace StormSockets
 
   void StormSocketFrontendBase::ReleaseServerSSL(StormSocketServerSSLData & ssl_data)
   {
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     mbedtls_x509_crt_free(&ssl_data.m_Cert);
     mbedtls_pk_free(&ssl_data.m_PrivateKey);
     mbedtls_ssl_config_free(&ssl_data.m_SSLConfig);
@@ -213,7 +217,7 @@ namespace StormSockets
 
   void StormSocketFrontendBase::InitClientSSL(StormSocketClientSSLData & ssl_data)
   {
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     mbedtls_entropy_init(&ssl_data.m_Entropy);
     mbedtls_ctr_drbg_init(&ssl_data.m_CtrDrbg);
 
@@ -262,7 +266,7 @@ namespace StormSockets
 
   void StormSocketFrontendBase::ReleaseClientSSL(StormSocketClientSSLData & ssl_data)
   {
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     mbedtls_x509_crt_free(&ssl_data.m_CA);
     mbedtls_ssl_config_free(&ssl_data.m_SSLConfig);
     mbedtls_ctr_drbg_free(&ssl_data.m_CtrDrbg);

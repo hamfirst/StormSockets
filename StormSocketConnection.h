@@ -5,7 +5,7 @@
 #include "StormMessageWriter.h"
 #include "StormWebsocketMessageReader.h"
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
 #include <mbedtls/ssl.h>
 #endif
 
@@ -36,7 +36,7 @@ namespace StormSockets
       memset(this, 0, sizeof(SSLContext));
     }
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     mbedtls_ssl_context m_SSLContext;
 #endif
 
@@ -65,14 +65,14 @@ namespace StormSockets
     int m_ReadOffset;
     int m_DisconnectFlags;
     std::atomic_int m_PendingPackets;
-    int m_SlotGen;
+    volatile int m_SlotGen;
     int m_PendingRemainingData;
     int m_PendingFreeData;
     std::atomic_int m_RecvCriticalSection;
 
     SSLContext m_SSLContext;
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     StormMessageWriter m_EncryptWriter;
 #endif
 

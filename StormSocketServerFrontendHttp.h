@@ -24,7 +24,7 @@ namespace StormSockets
     StormSocketServerFrontendHttp(const StormSocketServerFrontendHttpSettings & settings, StormSocketBackend * backend);
     ~StormSocketServerFrontendHttp();
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     bool UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) { return m_UseSSL; }
     mbedtls_ssl_config * GetSSLConfig() { return &m_SSLData.m_SSLConfig; }
 #endif

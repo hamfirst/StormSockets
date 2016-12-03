@@ -28,7 +28,7 @@ namespace StormSockets
 
     void FreeIncomingHttpResponse(StormHttpResponseReader & reader);
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
     bool UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
     mbedtls_ssl_config * GetSSLConfig() { return &m_SSLData.m_SSLConfig; }
 #endif

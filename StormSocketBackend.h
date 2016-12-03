@@ -18,7 +18,7 @@
 #include "StormSocketIOOperation.h"
 #include "StormSocketFrontend.h"
 
-#ifdef USE_MBED
+#ifndef DISABLE_MBED
 #include "mbedtls/ssl.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
@@ -105,7 +105,7 @@ namespace StormSockets
     StormFixedBlockAllocator & GetMessageSenders() { return m_MessageSenders; }
     StormFixedBlockAllocator & GetMessageReaders() { return m_MessageReaders; }
 
-    StormSocketConnectionBase & GetConnection(int index) { return m_Connections[index]; }
+    StormSocketConnectionBase & GetConnection(int index);
 
     StormMessageWriter CreateWriter(bool is_encrypted = false);
     StormHttpRequestWriter CreateHttpRequestWriter(const char * method, const char * uri, const char * host);
