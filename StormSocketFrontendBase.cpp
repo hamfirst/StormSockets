@@ -110,7 +110,7 @@ namespace StormSockets
   void StormSocketFrontendBase::CleanupAllConnections()
   {
     m_OwnedConnectionLock.lock();
-    auto connections = std::move(m_OwnedConnections);
+    auto connections = m_OwnedConnections;
     for (auto connection_id : connections)
     {
       ForceDisconnect(connection_id);
