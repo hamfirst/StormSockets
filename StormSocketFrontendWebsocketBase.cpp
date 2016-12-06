@@ -289,7 +289,10 @@ namespace StormSockets
                 return false;
               }
 
-              m_EventCondition.notify_one();
+              if (m_EventSemaphore)
+              {
+                m_EventSemaphore->Release();
+              }
 
               connection.m_PacketsRecved.fetch_add(1);
               ws_connection.m_InitialReader = reader;
@@ -379,7 +382,10 @@ namespace StormSockets
             return false;
           }
 
-          m_EventCondition.notify_one();
+          if (m_EventSemaphore)
+          {
+            m_EventSemaphore->Release();
+          }
 
           // Advance past this packet to check if another packet is in the buffer
           m_Backend->DiscardParserData(connection_id, ws_connection.m_PendingReaderFullPacketLen);
@@ -408,7 +414,10 @@ namespace StormSockets
               return false;
             }
 
-            m_EventCondition.notify_one();
+            if (m_EventSemaphore)
+            {
+              m_EventSemaphore->Release();
+            }
 
             connection.m_PacketsRecved.fetch_add(1);
             ws_connection.m_ReaderValid = false;

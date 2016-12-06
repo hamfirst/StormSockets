@@ -36,12 +36,6 @@ namespace StormSockets
     m_OwnedConnections.reserve(settings.MaxConnections);
   }
 
-  void StormSocketFrontendBase::WaitForEvent(int timeout_ms)
-  {
-    std::unique_lock<std::mutex> lock(m_EventMutex);
-    m_EventCondition.wait_for(lock, std::chrono::milliseconds(timeout_ms));
-  }
-
   bool StormSocketFrontendBase::GetEvent(StormSocketEventInfo & message)
   {
     if (m_EventQueue.TryDequeue(message))
@@ -287,7 +281,10 @@ namespace StormSockets
       std::this_thread::yield();
     }
 
-    m_EventCondition.notify_one();
+    if (m_EventSemaphore)
+    {
+      m_EventSemaphore->Release();
+    }
   }
 
   void StormSocketFrontendBase::QueueHandshakeCompleteEvent(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
@@ -305,7 +302,10 @@ namespace StormSockets
       std::this_thread::yield();
     }
 
-    m_EventCondition.notify_one();
+    if (m_EventSemaphore)
+    {
+      m_EventSemaphore->Release();
+    }
   }
 
   void StormSocketFrontendBase::QueueDisconnectEvent(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
@@ -323,7 +323,10 @@ namespace StormSockets
       std::this_thread::yield();
     }
 
-    m_EventCondition.notify_one();
+    if (m_EventSemaphore)
+    {
+      m_EventSemaphore->Release();
+    }
   }
 
   void StormSocketFrontendBase::ConnectionEstablishComplete(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)

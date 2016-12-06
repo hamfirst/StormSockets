@@ -312,7 +312,10 @@ namespace StormSockets
       return false;
     }
 
-    m_EventCondition.notify_one();
+    if (m_EventSemaphore)
+    {
+      m_EventSemaphore->Release();
+    }
 
     http_connection.m_CompleteRequest = true;
     return true;

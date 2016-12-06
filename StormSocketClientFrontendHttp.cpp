@@ -335,7 +335,10 @@ namespace StormSockets
       return false;
     }
 
-    m_EventCondition.notify_one();
+    if (m_EventSemaphore)
+    {
+      m_EventSemaphore->Release();
+    }
 
     http_connection.m_CompleteResponse = true;
     ForceDisconnect(connection_id);

@@ -4,6 +4,7 @@
 #include "StormWebsocketMessageReader.h"
 #include "StormHttpResponseReader.h"
 #include "StormHttpRequestReader.h"
+#include "StormSemaphore.h"
 
 #include <thread>
 #include <algorithm>
@@ -108,6 +109,7 @@ namespace StormSockets
     StormSocketListenData ListenSettings;
 
     const char * Protocol = nullptr;
+    StormSemaphore * EventSemaphore;
 
     bool UseMasking = false;
     StormSocketContinuationMode::Index ContinuationMode = StormSocketContinuationMode::Combine;
