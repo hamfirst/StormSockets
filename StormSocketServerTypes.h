@@ -80,6 +80,8 @@ namespace StormSockets
   {
     int MessageQueueSize = 128;
     int MaxConnections = 256;
+
+    StormSemaphore * EventSemaphore = nullptr;
   };
 
   struct StormSocketFrontendWebsocketSettings : public StormSocketFrontendSettings
@@ -109,7 +111,6 @@ namespace StormSockets
     StormSocketListenData ListenSettings;
 
     const char * Protocol = nullptr;
-    StormSemaphore * EventSemaphore;
 
     bool UseMasking = false;
     StormSocketContinuationMode::Index ContinuationMode = StormSocketContinuationMode::Combine;

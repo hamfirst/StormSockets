@@ -26,7 +26,8 @@ namespace StormSockets
     m_MessageReaders(backend->GetMessageReaders()),
     m_EventQueue(settings.MessageQueueSize),
     m_Backend(backend),
-    m_OwnedConnectionLock(m_OwnedConnectionMutex, std::defer_lock_t{})
+    m_OwnedConnectionLock(m_OwnedConnectionMutex, std::defer_lock_t{}),
+    m_EventSemaphore(settings.EventSemaphore)
   {
     m_MaxConnections = settings.MaxConnections;
 
