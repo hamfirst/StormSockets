@@ -62,6 +62,7 @@ namespace StormSockets
     int MaxPendingFreeingPacketsPerConnection = 32;
     int MaxPendingIncomingPacketsPerConnection = 32;
     int MaxSendQueueElements = 32;
+    int HandshakeTimeout = 0;
   };
 
   struct StormSocketServerSSLSettings
@@ -88,6 +89,9 @@ namespace StormSockets
   {
     bool UseMasking = false;
     StormSocketContinuationMode::Index ContinuationMode = StormSocketContinuationMode::Combine;
+
+    int MaxHeaderSize = 8092;
+    int MaxPacketSize = 0;
   };
 
   struct StormSocketFrontendHttpSettings : public StormSocketFrontendSettings
@@ -111,9 +115,6 @@ namespace StormSockets
     StormSocketListenData ListenSettings;
 
     const char * Protocol = nullptr;
-
-    bool UseMasking = false;
-    StormSocketContinuationMode::Index ContinuationMode = StormSocketContinuationMode::Combine;
   };
 
   struct StormSocketServerFrontendHttpSettings : public StormSocketFrontendHttpSettings

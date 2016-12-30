@@ -36,6 +36,7 @@ namespace StormSockets
     StormFixedBlockAllocator m_MessageReaders;
 
     std::unique_ptr<StormSocketConnectionBase[]> m_Connections;
+    std::unique_ptr<std::experimental::optional<asio::steady_timer>[]> m_Timeouts;
 
     asio::io_service m_IOService;
     asio::ip::tcp::resolver m_Resolver;
@@ -68,6 +69,7 @@ namespace StormSockets
     int m_NumIOThreads;
 
     int m_FixedBlockSize;
+    int m_HandshakeTimeout;
     bool m_ThreadStopRequested;
 
     static const int kBufferSetCount = 8;
@@ -137,6 +139,7 @@ namespace StormSockets
     void SignalCloseThread(StormSocketConnectionId id);
     void SetDisconnectFlag(StormSocketConnectionId id, StormSocketDisconnectFlags::Index flags);
     bool CheckDisconnectFlags(StormSocketConnectionId id, StormSocketDisconnectFlags::Index new_flags);
+    void SetHandshakeComplete(StormSocketConnectionId id);
 
     bool QueueOutgoingPacket(StormMessageWriter & writer, StormSocketConnectionId id);
     void SignalOutgoingSocket(StormSocketConnectionId id, StormSocketIOOperationType::Index type, std::size_t size = 0);

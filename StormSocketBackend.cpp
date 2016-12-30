@@ -29,8 +29,10 @@ namespace StormSockets
     m_ThreadStopRequested = false;
     m_NumSendThreads = settings.NumSendThreads;
     m_NumIOThreads = settings.NumIOThreads;
+    m_HandshakeTimeout = settings.HandshakeTimeout;
 
     m_Connections = std::make_unique<StormSocketConnectionBase[]>(settings.MaxConnections);
+    m_Timeouts = std::make_unique<std::experimental::optional<asio::steady_timer>[]>(settings.MaxConnections);
 
     for (int index = 0; index < settings.MaxConnections; index++)
     {
@@ -458,6 +460,7 @@ namespace StormSockets
   void StormSocketBackend::ForceDisconnect(StormSocketConnectionId id)
   {
     SetDisconnectFlag(id, StormSocketDisconnectFlags::kLocalClose);
+    SetDisconnectFlag(id, StormSocketDisconnectFlags::kSignalClose);
   }
 
   bool StormSocketBackend::ConnectionIdValid(StormSocketConnectionId id)
@@ -630,11 +633,24 @@ namespace StormSockets
 
       connection.m_SlotGen = (connection.m_SlotGen + 1) & 0xFF;
 
+      if (m_HandshakeTimeout > 0)
+      {
+        std::lock_guard<std::mutex> lock(connection.m_TimeoutLock);
+        m_Timeouts[id.GetIndex()]->cancel();
+        m_Timeouts[id.GetIndex()] = {};
+      }
+
       FreeConnectionSlot(id);
       return true;
     }
 
     return false;
+  }
+
+  void StormSocketBackend::SetHandshakeComplete(StormSocketConnectionId id)
+  {
+    auto & connection = GetConnection(id);
+    connection.m_HandshakeComplete.store(true);
   }
 
   StormSocketConnectionId StormSocketBackend::AllocateConnection(StormSocketFrontend * frontend, uint32_t remote_ip, uint16_t remote_port, bool for_connect, const void * init_data)
@@ -670,6 +686,7 @@ namespace StormSockets
 
         connection.m_PacketsRecved = 0;
         connection.m_PacketsSent = 0;
+        connection.m_HandshakeComplete = false;
         connection.m_FailedConnection = false;
 
         connection.m_RecvBuffer.InitBuffers();
@@ -681,6 +698,26 @@ namespace StormSockets
         connection.m_Frontend = frontend;
         connection.m_FrontendId = frontend_id;
 
+        if (m_HandshakeTimeout > 0)
+        {
+          auto handler = [=, slot_gen=connection.m_SlotGen](const asio::error_code& error)
+          {
+            if (!error)
+            {
+              std::lock_guard<std::mutex> lock(m_Connections[index].m_TimeoutLock);
+
+              if (m_Connections[index].m_SlotGen == slot_gen && m_Connections[index].m_HandshakeComplete == false)
+              {
+                ForceDisconnect(connection_id);
+              }
+            }
+          };
+
+          std::lock_guard<std::mutex> lock(connection.m_TimeoutLock);
+          m_Timeouts[index] = asio::steady_timer(m_IOService, std::chrono::steady_clock::now() + std::chrono::seconds(m_HandshakeTimeout));
+          m_Timeouts[index]->async_wait(handler);
+        }
+
         frontend->InitConnection(connection_id, frontend_id, init_data);
 
         if (for_connect == false)
@@ -690,7 +727,6 @@ namespace StormSockets
         }
 
         frontend->AssociateConnectionId(connection_id);
-
         return connection_id;
       }
     }

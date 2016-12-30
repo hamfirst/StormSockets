@@ -11,6 +11,7 @@ namespace StormSockets
   {
     m_UseMasking = settings.UseMasking;
     m_ContinuationMode = settings.ContinuationMode;
+    m_MaxPacketSize = settings.MaxPacketSize;
   }
 
   StormWebsocketMessageWriter StormSocketFrontendWebsocketBase::CreateOutgoingPacket(StormSocketWebsocketDataType::Index type, bool final)
@@ -133,6 +134,12 @@ namespace StormSockets
         // At this point, we have the full packet in memory
 
         int full_data_len = (int)len + header_len;
+
+        if (m_MaxPacketSize > 0 && full_data_len > m_MaxPacketSize)
+        {
+          m_Backend->SignalCloseThread(connection_id);
+          return true;
+        }
 
         StormSocketWebsocketDataType::Index data_type = StormSocketWebsocketDataType::Binary;
 

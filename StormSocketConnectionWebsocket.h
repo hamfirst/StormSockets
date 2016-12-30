@@ -42,6 +42,7 @@ namespace StormSockets
     bool m_GotWebsocketVerHeader = false;
     bool m_GotWebsocketProtoHeader = false;
     bool m_GotHeaderTerminator = false;
+    int m_ProcessedHeaderSize = 0;
   };
 
   struct StormSocketClientConnectionWebsocket : public StormWebsocketConnectionBase

@@ -20,6 +20,8 @@ namespace StormSockets
     StormWebsocketHeaderValues m_HeaderValues;
     bool m_HasProtocol;
 
+    int m_MaxHeaderSize;
+
   public:
 
     StormSocketServerFrontendWebsocket(const StormSocketServerFrontendWebsocketSettings & settings, StormSocketBackend * backend);

@@ -7,7 +7,8 @@ namespace StormSockets
     const StormSocketServerFrontendWebsocketSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendWebsocketBase(settings, backend),
     m_ConnectionAllocator(sizeof(StormSocketServerConnectionWebSocket) * settings.MaxConnections, sizeof(StormSocketServerConnectionWebSocket), false),
-    m_HeaderValues(settings.Protocol)
+    m_HeaderValues(settings.Protocol),
+    m_MaxHeaderSize(settings.MaxHeaderSize)
   {
     m_HasProtocol = settings.Protocol != NULL;
 
@@ -177,6 +178,7 @@ namespace StormSockets
               m_HeaderValues.WriteHeader(ws_connection.m_PendingWriter, StormWebsocketHeaderType::ResponseTerminator);
               ws_connection.m_State = StormSocketServerConnectionWebsocketState::SendHandshakeResponse;
 
+              m_Backend->SetHandshakeComplete(connection_id);
             }
             else
             {
@@ -186,7 +188,19 @@ namespace StormSockets
             break;
           }
 
+          ws_connection.m_ProcessedHeaderSize += full_data_len;
+          if (m_MaxHeaderSize > 0 && m_MaxHeaderSize < ws_connection.m_ProcessedHeaderSize)
+          {
+            ForceDisconnect(connection_id);
+            break;
+          }
+
           cur_header = header_reader.AdvanceToNextHeader(full_data_len, got_header);
+        }
+
+        if (ws_connection.m_State == StormSocketServerConnectionWebsocketState::HandShake)
+        {
+          return true;
         }
       }
 

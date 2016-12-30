@@ -76,9 +76,11 @@ namespace StormSockets
     StormMessageWriter m_EncryptWriter;
 #endif
 
-
     std::atomic_int m_PacketsSent;
     std::atomic_int m_PacketsRecved;
+
+    std::mutex m_TimeoutLock;
+    std::atomic_bool m_HandshakeComplete;
 
     volatile bool m_FailedConnection;
   };

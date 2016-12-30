@@ -161,6 +161,7 @@ namespace StormSockets
 
           if (got_terminator)
           {
+            m_Backend->SetHandshakeComplete(connection_id);
             if (http_connection.m_Chunked)
             {
               http_connection.m_State = StormSocketClientConnectionHttpState::ReadingChunkSize;
