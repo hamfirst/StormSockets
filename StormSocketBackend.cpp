@@ -142,15 +142,14 @@ namespace StormSockets
 
     asio::ip::tcp::endpoint endpoint(asio::ip::address_v4::from_string(init_data.LocalInterface), init_data.Port);
     acceptor.m_Acceptor.open(asio::ip::tcp::v4());
-    asio::socket_base::reuse_address option(true);
-    acceptor.m_Acceptor.set_option(option);
-
-    acceptor.m_Acceptor.bind(endpoint);
+    acceptor.m_Acceptor.set_option(asio::ip::tcp::no_delay(true));
+    acceptor.m_Acceptor.bind(endpoint);    
     acceptor.m_Acceptor.listen();
 
     guard.unlock();
 
     PrepareToAccept(acceptor_id);
+
     return acceptor_id;
   }
 
@@ -774,9 +773,6 @@ namespace StormSockets
 
     auto & acceptor = acceptor_itr->second;
 
-    acceptor.m_AcceptSocket.set_option(asio::ip::tcp::no_delay(true));
-    acceptor.m_AcceptSocket.set_option(asio::socket_base::linger(1, 1));
-    acceptor.m_AcceptSocket.non_blocking(true);
 
     StormSocketConnectionId connection_id = AllocateConnection(acceptor.m_Frontend, 
       acceptor.m_AcceptEndpoint.address().to_v4().to_ulong(), acceptor.m_AcceptEndpoint.port(), false, nullptr);
@@ -789,6 +785,7 @@ namespace StormSockets
     }
 
     m_ClientSockets[connection_id].emplace(std::move(acceptor.m_AcceptSocket));
+    m_ClientSockets[connection_id]->set_option(asio::ip::tcp::no_delay(true));
 
     auto & connection = GetConnection(connection_id);
 
