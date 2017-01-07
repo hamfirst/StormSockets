@@ -127,6 +127,7 @@ namespace StormSockets
         return;
       }
 
+      m_OwnedConnectionLock.unlock();
       std::this_thread::yield();
     }
   }
