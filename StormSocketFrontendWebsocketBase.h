@@ -13,6 +13,7 @@ namespace StormSockets
 
     bool m_UseMasking;
     StormSocketContinuationMode::Index m_ContinuationMode;
+    int m_MaxPacketSize;
 
   public:
 

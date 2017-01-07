@@ -34,6 +34,7 @@ namespace StormSockets
 			}
 		}
 
+    found_complete_header = false;
 		return StormMessageReaderCursor(m_Allocator, start_block, 0, start_offset);
 	}
 }

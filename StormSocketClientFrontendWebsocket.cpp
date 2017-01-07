@@ -234,6 +234,8 @@ namespace StormSockets
 
           if (ws_connection.m_GotHeaderTerminator)
           {
+            m_Backend->SetHandshakeComplete(connection_id);
+
             // Check to see if the connection is a valid websocket request
             if (ws_connection.m_GotStatusLineHeader &&
               ws_connection.m_GotWebsocketHeader &&
@@ -254,6 +256,11 @@ namespace StormSockets
           }
 
           cur_header = header_reader.AdvanceToNextHeader(full_data_len, got_header);
+        }
+
+        if (ws_connection.m_State == StormSocketServerConnectionWebsocketState::HandShake)
+        {
+          return true;
         }
       }
 

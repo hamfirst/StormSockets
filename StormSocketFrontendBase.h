@@ -64,13 +64,11 @@ namespace StormSockets
     std::mutex m_OwnedConnectionMutex;
     std::unique_lock<std::mutex> m_OwnedConnectionLock;
 
-    std::mutex m_EventMutex;
-    std::condition_variable m_EventCondition;
+    StormSemaphore * m_EventSemaphore;
 
 	public:
     StormSocketFrontendBase(const StormSocketFrontendSettings & settings, StormSocketBackend * backend);
 
-    void WaitForEvent(int timeout_ms);
 		bool GetEvent(StormSocketEventInfo & message);
 
 		bool SendPacketToConnection(StormMessageWriter & writer, StormSocketConnectionId id);

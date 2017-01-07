@@ -217,6 +217,7 @@ namespace StormSockets
 
           if (got_terminator)
           {
+            m_Backend->SetHandshakeComplete(connection_id);
             if (http_connection.m_Chunked)
             {
               http_connection.m_State = StormSocketClientConnectionHttpState::ReadingChunkSize;
@@ -335,7 +336,10 @@ namespace StormSockets
       return false;
     }
 
-    m_EventCondition.notify_one();
+    if (m_EventSemaphore)
+    {
+      m_EventSemaphore->Release();
+    }
 
     http_connection.m_CompleteResponse = true;
     ForceDisconnect(connection_id);

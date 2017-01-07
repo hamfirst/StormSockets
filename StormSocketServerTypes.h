@@ -4,6 +4,7 @@
 #include "StormWebsocketMessageReader.h"
 #include "StormHttpResponseReader.h"
 #include "StormHttpRequestReader.h"
+#include "StormSemaphore.h"
 
 #include <thread>
 #include <algorithm>
@@ -61,6 +62,7 @@ namespace StormSockets
     int MaxPendingFreeingPacketsPerConnection = 32;
     int MaxPendingIncomingPacketsPerConnection = 32;
     int MaxSendQueueElements = 32;
+    int HandshakeTimeout = 0;
   };
 
   struct StormSocketServerSSLSettings
@@ -79,12 +81,17 @@ namespace StormSockets
   {
     int MessageQueueSize = 128;
     int MaxConnections = 256;
+
+    StormSemaphore * EventSemaphore = nullptr;
   };
 
   struct StormSocketFrontendWebsocketSettings : public StormSocketFrontendSettings
   {
     bool UseMasking = false;
     StormSocketContinuationMode::Index ContinuationMode = StormSocketContinuationMode::Combine;
+
+    int MaxHeaderSize = 8092;
+    int MaxPacketSize = 0;
   };
 
   struct StormSocketFrontendHttpSettings : public StormSocketFrontendSettings
@@ -108,9 +115,6 @@ namespace StormSockets
     StormSocketListenData ListenSettings;
 
     const char * Protocol = nullptr;
-
-    bool UseMasking = false;
-    StormSocketContinuationMode::Index ContinuationMode = StormSocketContinuationMode::Combine;
   };
 
   struct StormSocketServerFrontendHttpSettings : public StormSocketFrontendHttpSettings
