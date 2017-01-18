@@ -272,8 +272,10 @@ namespace StormSockets
           break;
         }
 
-        if (ent->d_type == DT_LNK || ent->d_type == DT_REG)
+        printf("Found cert file: %s, %d\n", ent->d_name, ent->d_type);
+        if (ent->d_type == DT_LNK || ent->d_type == DT_REG || ent->d_type == DT_UNKNOWN)
         {
+          printf("Is Valid File!\n");
           if (strstr(ent->d_name, ".crt"))
           {
             std::string crt_filename = std::string("/etc/ssl/certs/") + ent->d_name;
@@ -294,8 +296,14 @@ namespace StormSockets
             fread(buffer.get(), 1, len, fp);
             fclose(fp);
 
-            mbedtls_x509_crt_parse(&ssl_data.m_CA, buffer.get(), len);
-            printf("Loading cert file succeeded\n");
+            if (mbedtls_x509_crt_parse(&ssl_data.m_CA, buffer.get(), len) == 0)
+            {
+              printf("Loading cert file succeeded\n");
+            }
+            else
+            {
+              printf("Loading cert failed to parse\n");
+            }
           }
         }
       }
