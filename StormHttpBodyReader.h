@@ -15,7 +15,6 @@ namespace StormSockets
 
     friend class StormHttpResponseReader;
     friend class StormHttpRequestReader;
-    friend class StormHttpBodyReader;
 
   private:
     StormHttpBodyReader(StormMessageReaderData * packet_info, StormFixedBlockAllocator * allocator, StormFixedBlockAllocator * reader_allocator, int full_data_len);
