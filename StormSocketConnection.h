@@ -51,37 +51,37 @@ namespace StormSockets
   struct StormSocketConnectionBase
   {
     std::atomic_flag m_Used = ATOMIC_FLAG_INIT;
-    unsigned int m_RemoteIP;
-    unsigned short m_RemotePort;
-    StormSocketFrontend * m_Frontend;
-    StormSocketFrontendConnectionId m_FrontendId;
+    unsigned int m_RemoteIP = 0;
+    unsigned short m_RemotePort = 0;
+    StormSocketFrontend * m_Frontend = nullptr;
+    StormSocketFrontendConnectionId m_FrontendId = InvalidBlockHandle;
 
     StormSocketBuffer m_RecvBuffer;
     StormSocketBuffer m_DecryptBuffer;
     StormFixedBlockHandle m_ParseBlock;
     StormFixedBlockHandle m_PendingSendBlock;
-    std::atomic_int m_UnparsedDataLength;
-    int m_ParseOffset;
-    int m_ReadOffset;
-    int m_DisconnectFlags;
-    std::atomic_int m_PendingPackets;
-    volatile int m_SlotGen;
-    int m_PendingRemainingData;
-    int m_PendingFreeData;
-    std::atomic_int m_RecvCriticalSection;
+    std::atomic_int m_UnparsedDataLength = 0;
+    int m_ParseOffset = 0;
+    int m_ReadOffset = 0;
+    int m_DisconnectFlags = 0;
+    std::atomic_int m_PendingPackets = 0;
+    volatile int m_SlotGen = 0;
+    int m_PendingRemainingData = 0;
+    int m_PendingFreeData = 0;
+    std::atomic_int m_RecvCriticalSection = 0;
 
-    SSLContext m_SSLContext;
+    SSLContext m_SSLContext = {};
 
 #ifndef DISABLE_MBED
-    StormMessageWriter m_EncryptWriter;
+    StormMessageWriter m_EncryptWriter = {};
 #endif
 
-    std::atomic_int m_PacketsSent;
-    std::atomic_int m_PacketsRecved;
+    std::atomic_int m_PacketsSent = 0;
+    std::atomic_int m_PacketsRecved = 0;
 
     std::mutex m_TimeoutLock;
-    std::atomic_bool m_HandshakeComplete;
+    std::atomic_bool m_HandshakeComplete = false;
 
-    volatile bool m_FailedConnection;
+    volatile bool m_FailedConnection = false;
   };
 }

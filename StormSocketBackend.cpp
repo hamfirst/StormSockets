@@ -34,11 +34,6 @@ namespace StormSockets
     m_Connections = std::make_unique<StormSocketConnectionBase[]>(settings.MaxConnections);
     m_Timeouts = std::make_unique<std::experimental::optional<asio::steady_timer>[]>(settings.MaxConnections);
 
-    for (int index = 0; index < settings.MaxConnections; index++)
-    {
-      m_Connections[index].m_SlotGen = 0;
-    }
-
     m_SendThreadSemaphores = std::make_unique<StormSemaphore[]>(settings.NumSendThreads);
     m_SendQueue = std::make_unique<StormMessageMegaQueue<StormSocketIOOperation>[]>(settings.NumSendThreads);
     m_SendQueueArray = std::make_unique<StormMessageMegaContainer<StormSocketIOOperation>[]>(settings.NumSendThreads * settings.MaxSendQueueElements);
@@ -773,6 +768,7 @@ namespace StormSockets
 
     auto & acceptor = acceptor_itr->second;
 
+    printf("Backend got a connection\n");
 
     StormSocketConnectionId connection_id = AllocateConnection(acceptor.m_Frontend, 
       acceptor.m_AcceptEndpoint.address().to_v4().to_ulong(), acceptor.m_AcceptEndpoint.port(), false, nullptr);
@@ -1158,6 +1154,7 @@ namespace StormSockets
 
   void StormSocketBackend::IOThreadMain()
   {
+    printf("Starting recv thread\n");
     while (m_ThreadStopRequested == false)
     {
       m_IOService.run();
