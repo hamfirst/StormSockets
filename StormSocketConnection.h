@@ -80,7 +80,7 @@ namespace StormSockets
     std::atomic_int m_PacketsRecved;
 
     std::mutex m_TimeoutLock;
-    std::atomic_bool m_HandshakeComplete = false;
+    std::atomic_bool m_HandshakeComplete;
 
     volatile bool m_FailedConnection = false;
   };
