@@ -294,7 +294,7 @@ namespace StormSockets
             fread(fp, 1, len, buffer.get());
             fclose(fp);
 
-            mbedtls_x509_crt_parse(&ssl_data.m_CA, cert_context->pbCertEncoded, cert_context->cbCertEncoded);
+            mbedtls_x509_crt_parse(&ssl_data.m_CA, buffer.get(), len);
             printf("Loading cert file succeeded\n");
           }
         }
