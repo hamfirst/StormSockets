@@ -74,6 +74,9 @@ namespace StormSockets
     m_ClientSockets = std::make_unique<std::experimental::optional<asio::ip::tcp::socket>[]>(settings.MaxConnections);
 
     // Start the io threads
+    m_IOResetCount = 0;
+    m_IOResetSemaphore.Init(INT_MAX);
+
     m_IOThreads = std::make_unique<std::thread[]>(m_NumIOThreads);
     for (int index = 0; index < m_NumIOThreads; index++)
     {
@@ -631,7 +634,7 @@ namespace StormSockets
       {
         std::lock_guard<std::mutex> lock(connection.m_TimeoutLock);
         m_Timeouts[id.GetIndex()]->cancel();
-        m_Timeouts[id.GetIndex()] = {};
+        m_Timeouts[id.GetIndex()] = std::experimental::nullopt;
       }
 
       FreeConnectionSlot(id);
@@ -708,7 +711,7 @@ namespace StormSockets
           };
 
           std::lock_guard<std::mutex> lock(connection.m_TimeoutLock);
-          m_Timeouts[index] = asio::steady_timer(m_IOService, std::chrono::steady_clock::now() + std::chrono::seconds(m_HandshakeTimeout));
+          m_Timeouts[index].emplace(m_IOService, std::chrono::steady_clock::now() + std::chrono::seconds(m_HandshakeTimeout));
           m_Timeouts[index]->async_wait(handler);
         }
 
@@ -1157,7 +1160,30 @@ namespace StormSockets
     printf("Starting recv thread\n");
     while (m_ThreadStopRequested == false)
     {
-      m_IOService.run();
+      if (m_IOService.run() == 0)
+      {
+        if (m_IOService.stopped())
+        {
+          auto val = m_IOResetCount.fetch_add(1);
+          if (val == m_NumIOThreads - 1)
+          {
+            m_IOService.reset();
+            m_IOResetCount = 0;
+            m_IOResetSemaphore.Release(m_NumIOThreads - 1);
+          }
+          else
+          {
+            while (m_IOResetSemaphore.WaitOne(100) == false)
+            {
+              if (m_ThreadStopRequested)
+              {
+                return;
+              }
+            }
+          }
+        }
+      }
+
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
   }

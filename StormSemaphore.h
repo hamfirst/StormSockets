@@ -22,7 +22,7 @@ namespace StormSockets
 
 	public:
 		void Init(int max_count);
-		void WaitOne(int ms);
+		bool WaitOne(int ms);
 		void WaitOne();
 
 		void Release(int amount = 1);

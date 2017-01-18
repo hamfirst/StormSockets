@@ -68,6 +68,9 @@ namespace StormSockets
     int m_NumSendThreads;
     int m_NumIOThreads;
 
+    StormSemaphore m_IOResetSemaphore;
+    std::atomic_int m_IOResetCount;
+
     int m_FixedBlockSize;
     int m_HandshakeTimeout;
     bool m_ThreadStopRequested;

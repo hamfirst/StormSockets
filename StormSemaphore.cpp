@@ -15,18 +15,20 @@ namespace StormSockets
 #endif
 	}
 
-	void StormSemaphore::WaitOne(int ms)
+	bool StormSemaphore::WaitOne(int ms)
 	{
 #if defined(_WINDOWS) && defined(USE_NATIVE_SEMAPHORE)
 		WaitForSingleObject(m_Semaphore, ms);
 #else
-    std::unique_lock<std::mutex> lck(m_Mutex);
-    while (m_Count == 0)
+    std::unique_lock<std::mutex> lock{ m_Mutex };
+    auto finished = m_ConditionVariable.wait_for(lock, std::chrono::milliseconds(ms), [&] { return m_Count > 0; });
+
+    if (finished)
     {
-      m_ConditionVariable.wait_for(lck, std::chrono::milliseconds(ms));
+      --m_Count;
     }
 
-    m_Count--;
+    return finished;
 #endif
 	}
 
