@@ -292,9 +292,11 @@ namespace StormSockets
             auto len = ftell(fp);
             fseek(fp, 0, SEEK_SET);
 
-            auto buffer = std::make_unique<uint8_t[]>(len);
+            auto buffer = std::make_unique<uint8_t[]>(len + 1);
             fread(buffer.get(), 1, len, fp);
             fclose(fp);
+
+            buffer[len] = 0;
 
             if (mbedtls_x509_crt_parse(&ssl_data.m_CA, buffer.get(), len) == 0)
             {
