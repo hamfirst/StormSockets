@@ -18,6 +18,12 @@
 #define MBED_CHECK_ERROR if(error < 0) throw std::runtime_error("Certificate load error " + std::to_string(error));
 #endif
 
+#ifdef _LINUX
+#include <cstdio>
+
+#include <dirent.h>
+#endif
+
 namespace StormSockets
 {
   StormSocketFrontendBase::StormSocketFrontendBase(const StormSocketFrontendSettings & settings, StormSocketBackend * backend) :
@@ -251,6 +257,49 @@ namespace StormSockets
     }
 
     CertCloseStore(cert_store, 0);
+#endif
+
+#ifdef _LINUX
+    auto dir = opendir("/etc/ssl/certs");
+    if (dir != nullptr)
+    {
+      while(true)
+      {
+        auto ent = readdir(dir);
+        if (ent == nullptr)
+        {
+          closedir(dir);
+          break;
+        }
+
+        if (ent->d_type == DT_LNK || ent->d_type == DT_REG)
+        {
+          if (strstr(ent->d_name, ".crt"))
+          {
+            std::string crt_filename = std::string("/etc/ssl/certs/") + ent->d_name;
+            printf("Loading cert file: %s\n", crt_filename.c_str());
+
+            auto fp = fopen(crt_filename.c_str(), "rb");
+            if (fp == nullptr)
+            {
+              printf("Loading cert file failed\n");
+              continue;
+            }
+
+            fseek(fp, 0, SEEK_END);
+            auto len = ftell(fp);
+            fseek(fp, 0, SEEK_SET);
+
+            auto buffer = std::make_unique<uint8_t[]>(len);
+            fread(fp, 1, len, buffer.get());
+            fclose(fp);
+
+            mbedtls_x509_crt_parse(&ssl_data.m_CA, cert_context->pbCertEncoded, cert_context->cbCertEncoded);
+            printf("Loading cert file succeeded\n");
+          }
+        }
+      }
+    }
 #endif
 
     mbedtls_ssl_conf_ca_chain(&ssl_data.m_SSLConfig, &ssl_data.m_CA, nullptr);
