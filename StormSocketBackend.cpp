@@ -1261,7 +1261,6 @@ namespace StormSockets
             }
             else
             {
-              throw std::runtime_error("Error sending packet");
               break;
             }
           }
@@ -1397,7 +1396,7 @@ namespace StormSockets
               }
             };
 
-            asio::async_write(m_ClientSockets[connection_id].value(), buffer_set, send_callback);
+            m_ClientSockets[connection_id]->async_send(buffer_set, send_callback);
 
             Profiling::EndProfiler(prof, ProfilerCategory::kSend);
 
