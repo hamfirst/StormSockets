@@ -38,7 +38,6 @@ namespace StormSockets
     m_MaxConnections = settings.MaxConnections;
 
     m_FixedBlockSize = backend->GetFixedBlockSize();
-    m_MaxPendingFrees = backend->GetMaxPendingFrees();
 
     m_OwnedConnections.reserve(settings.MaxConnections);
   }

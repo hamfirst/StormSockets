@@ -29,11 +29,22 @@ namespace StormSockets
 {
   using StormSocketBackendAcceptorId = int;
 
+  struct StormPendingSendBlock
+  {
+    void * m_DataStart;
+    int m_DataLen;
+
+    StormFixedBlockHandle m_StartBlock;
+    StormFixedBlockHandle m_PacketHandle;
+    std::atomic_int * m_RefCount;
+  };
+
   class StormSocketBackend
   {
     StormFixedBlockAllocator m_Allocator;
     StormFixedBlockAllocator m_MessageSenders;
     StormFixedBlockAllocator m_MessageReaders;
+    StormFixedBlockAllocator m_PendingSendBlocks;
 
     std::unique_ptr<StormSocketConnectionBase[]> m_Connections;
     std::unique_ptr<std::experimental::optional<asio::steady_timer>[]> m_Timeouts;
@@ -54,11 +65,6 @@ namespace StormSockets
     std::unique_ptr<StormMessageMegaQueue<StormSocketIOOperation>[]> m_SendQueue;
     std::unique_ptr<StormMessageMegaContainer<StormSocketIOOperation>[]> m_SendQueueArray;
     std::unique_ptr<StormGenIndex[]> m_SendQueueIncdices;
-
-    std::unique_ptr<StormMessageMegaQueue<StormSocketFreeQueueElement>[]> m_FreeQueue;
-    std::unique_ptr<StormMessageMegaContainer<StormSocketFreeQueueElement>[]> m_FreeQueueArray;
-    std::unique_ptr<StormGenIndex[]> m_FreeQueueIncdices;
-    int m_MaxPendingFrees;
 
     StormMessageQueue<StormSocketConnectionId> m_ClosingConnectionQueue;
     std::thread m_CloseConnectionThread;
@@ -105,7 +111,6 @@ namespace StormSockets
     void RequestStop() { m_ThreadStopRequested = true; }
 
     int GetFixedBlockSize() { return m_FixedBlockSize; }
-    int GetMaxPendingFrees() { return m_MaxPendingFrees; }
     StormFixedBlockAllocator & GetAllocator() { return m_Allocator; }
     StormFixedBlockAllocator & GetMessageSenders() { return m_MessageSenders; }
     StormFixedBlockAllocator & GetMessageReaders() { return m_MessageReaders; }
@@ -165,12 +170,11 @@ namespace StormSockets
     void TryProcessReceivedData(StormSocketConnectionId connection_id);
 
     void IOThreadMain();
-    void SetBufferSet(SendBuffer & buffer_set, int buffer_index, const void * ptr, int length);
-
-    int FillBufferSet(SendBuffer & buffer_set, int & cur_buffer, int pending_data, StormMessageWriter & writer, int send_offset, StormFixedBlockHandle & send_block);
+    void TransmitConnectionPackets(StormSocketConnectionId connection_id);
 
     void SendThreadMain(int thread_index);
 
+    StormFixedBlockHandle ReleasePendingSendBlock(StormFixedBlockHandle send_block_handle, StormPendingSendBlock * send_block);
     void ReleaseSendQueue(StormSocketConnectionId connection_id, int connection_gen);
     StormMessageWriter EncryptWriter(StormSocketConnectionId connection_id, StormMessageWriter & writer);
 

@@ -21,6 +21,7 @@ namespace StormSockets
     m_Allocator(settings.HeapSize, settings.BlockSize, true),
     m_MessageReaders(settings.MaxPendingOutgoingPacketsPerConnection * sizeof(StormMessageReaderData) * settings.MaxConnections, sizeof(StormMessageReaderData), false),
     m_MessageSenders(settings.MaxPendingOutgoingPacketsPerConnection * sizeof(StormMessageWriterData) * settings.MaxConnections, sizeof(StormMessageWriterData), false),
+    m_PendingSendBlocks(settings.MaxPendingSendBlocks, sizeof(StormPendingSendBlock), false),
     m_ClosingConnectionQueue(settings.MaxConnections),
     m_Resolver(m_IOService)
   {
@@ -43,11 +44,6 @@ namespace StormSockets
     m_OutputQueueArray = std::make_unique<StormMessageMegaContainer<StormMessageWriter>[]>(settings.MaxConnections * settings.MaxPendingOutgoingPacketsPerConnection);
     m_OutputQueueIncdices = std::make_unique<StormGenIndex[]>(settings.MaxConnections * settings.MaxPendingOutgoingPacketsPerConnection);
 
-    m_FreeQueue = std::make_unique<StormMessageMegaQueue<StormSocketFreeQueueElement>[]>(settings.MaxConnections);
-    m_FreeQueueArray = std::make_unique<StormMessageMegaContainer<StormSocketFreeQueueElement>[]>(settings.MaxConnections * settings.MaxPendingFreeingPacketsPerConnection * 2);
-    m_FreeQueueIncdices = std::make_unique<StormGenIndex[]>(settings.MaxConnections * settings.MaxPendingFreeingPacketsPerConnection * 2);
-    m_MaxPendingFrees = settings.MaxPendingFreeingPacketsPerConnection * 2;
-
     m_CloseConnectionSemaphore.Init(settings.MaxConnections);
     m_CloseConnectionThread = std::thread(&StormSocketBackend::CloseSocketThread, this);
 
@@ -57,9 +53,6 @@ namespace StormSockets
     {
       m_OutputQueue[index].Init(m_OutputQueueIncdices.get(), m_OutputQueueArray.get(),
         index * settings.MaxPendingOutgoingPacketsPerConnection, settings.MaxPendingOutgoingPacketsPerConnection);
-
-      m_FreeQueue[index].Init(m_FreeQueueIncdices.get(), m_FreeQueueArray.get(),
-        index * settings.MaxPendingFreeingPacketsPerConnection * 2, settings.MaxPendingFreeingPacketsPerConnection * 2);
     }
 
     for (int index = 0; index < settings.NumSendThreads; index++)
@@ -67,7 +60,7 @@ namespace StormSockets
       m_SendQueue[index].Init(m_SendQueueIncdices.get(), m_SendQueueArray.get(),
         index * settings.MaxSendQueueElements, settings.MaxSendQueueElements);
 
-      int semaphore_max = settings.MaxSendQueueElements + (settings.MaxConnections * settings.MaxPendingFreeingPacketsPerConnection) / settings.NumSendThreads;
+      int semaphore_max = settings.MaxSendQueueElements + (settings.MaxConnections * settings.MaxPendingOutgoingPacketsPerConnection) / settings.NumSendThreads;
       m_SendThreadSemaphores[index].Init(semaphore_max * 2);
     }
 
@@ -313,7 +306,7 @@ namespace StormSockets
     }
 
     connection.m_PacketsSent.fetch_add(1);
-    SignalOutgoingSocket(id, StormSocketIOOperationType::SendPacket);
+    SignalOutgoingSocket(id, StormSocketIOOperationType::QueuePacket);
     return true;
   }
 
@@ -346,7 +339,7 @@ namespace StormSockets
       std::this_thread::yield();
     }
 
-    SignalOutgoingSocket(id, StormSocketIOOperationType::SendPacket);
+    SignalOutgoingSocket(id, StormSocketIOOperationType::QueuePacket);
   }
 
   void StormSocketBackend::SendHttpRequestToConnection(StormHttpRequestWriter & writer, StormSocketConnectionId id)
@@ -426,7 +419,7 @@ namespace StormSockets
 
     StormSocketIOOperation op;
     op.m_ConnectionId = id;
-    op.m_Type = StormSocketIOOperationType::SendPacket;
+    op.m_Type = StormSocketIOOperationType::QueuePacket;
     op.m_Size = 0;
 
     while (m_SendQueue[send_thread_index].Enqueue(op, 0, m_SendQueueIncdices.get(), m_SendQueueArray.get()) == false)
@@ -498,11 +491,6 @@ namespace StormSockets
     while (true)
     {
       int pending_packets = connection.m_PendingPackets;
-      if (pending_packets >= m_MaxPendingFrees - amount)
-      {
-        return false;
-      }
-
       if (std::atomic_compare_exchange_weak(&connection.m_PendingPackets, &pending_packets, pending_packets + amount))
       {
         return true;
@@ -668,19 +656,20 @@ namespace StormSockets
         connection.m_DecryptBuffer = StormSocketBuffer(&m_Allocator, m_FixedBlockSize);
         connection.m_RecvBuffer = StormSocketBuffer(&m_Allocator, m_FixedBlockSize);
         connection.m_ParseBlock = InvalidBlockHandle;
-        connection.m_PendingSendBlock = InvalidBlockHandle;
         connection.m_UnparsedDataLength = 0;
         connection.m_ParseOffset = 0;
         connection.m_ReadOffset = 0;
         connection.m_RemoteIP = remote_ip;
         connection.m_RemotePort = remote_port;
         connection.m_PendingPackets = 0;
-        connection.m_PendingRemainingData = 0;
-        connection.m_PendingFreeData = 0;
         connection.m_DisconnectFlags = 0;
 
         connection.m_SSLContext = SSLContext();
         connection.m_RecvCriticalSection = 0;
+
+        connection.m_PendingSendBlockStart = InvalidBlockHandle;
+        connection.m_PendingSendBlockCur = InvalidBlockHandle;
+        connection.m_Transmitting = false;
 
         connection.m_PacketsRecved = 0;
         connection.m_PacketsSent = 0;
@@ -1189,38 +1178,6 @@ namespace StormSockets
     }
   }
 
-  void StormSocketBackend::SetBufferSet(SendBuffer & buffer_set, int buffer_index, const void * ptr, int length)
-  {
-    buffer_set[buffer_index] = asio::buffer(ptr, length);
-  }
-
-  int StormSocketBackend::FillBufferSet(SendBuffer & buffer_set, int & cur_buffer, int pending_data, StormMessageWriter & writer, int send_offset, StormFixedBlockHandle & send_block)
-  {
-    StormFixedBlockHandle block_handle = send_block;
-    send_block = InvalidBlockHandle;
-    int header_offset = send_offset;
-
-    while (pending_data > 0 && cur_buffer < kBufferSetCount && block_handle != InvalidBlockHandle)
-    {
-      int potential_data_in_block = m_FixedBlockSize - header_offset - (writer.m_ReservedHeaderLength + writer.m_ReservedTrailerLength);
-      int set_len = std::min(pending_data, potential_data_in_block);
-      int data_start = writer.m_ReservedHeaderLength - writer.m_HeaderLength + header_offset;
-      int data_length = writer.m_HeaderLength + set_len + writer.m_TrailerLength;
-
-      void * block = m_Allocator.ResolveHandle(block_handle);
-
-      SetBufferSet(buffer_set, cur_buffer, Marshal::MemOffset(block, data_start), data_length);
-      block_handle = m_Allocator.GetNextBlock(block_handle);
-
-      header_offset = 0;
-      pending_data -= set_len;
-      send_block = block_handle;
-
-      cur_buffer++;
-    }
-
-    return pending_data;
-  }
 
   void StormSocketBackend::SendThreadMain(int thread_index)
   {
@@ -1240,30 +1197,39 @@ namespace StormSockets
 
         if (op.m_Type == StormSocketIOOperationType::FreePacket)
         {
-          connection.m_PendingFreeData += op.m_Size;
-          if (connection_gen != connection.m_SlotGen)
-          {
-            continue;
-          }
+          connection.m_Transmitting = false;
 
-          StormSocketFreeQueueElement free_elem;
-
-          while (m_FreeQueue[connection_id].PeekTop(free_elem, connection_gen, m_FreeQueueIncdices.get(), m_FreeQueueArray.get(), 0))
+          StormFixedBlockHandle block_handle = connection.m_PendingSendBlockStart;
+          while (op.m_Size > 0)
           {
-            int writer_len = free_elem.m_RequestWriter.m_PacketInfo->m_TotalLength;
-            if (connection.m_PendingFreeData >= writer_len)
+            if (block_handle == InvalidBlockHandle)
             {
-              FreeOutgoingPacket(free_elem.m_RequestWriter);
-              ReleasePacketSlot(connection_id);
+              throw std::runtime_error("Sent more data than was in buffer");
+            }
 
-              connection.m_PendingFreeData -= writer_len;
-              m_FreeQueue[connection_id].Advance(connection_gen, m_FreeQueueIncdices.get(), m_FreeQueueArray.get());
+            StormPendingSendBlock * send_block = (StormPendingSendBlock *)m_PendingSendBlocks.ResolveHandle(block_handle);
+
+            if (op.m_Size >= send_block->m_DataLen)
+            {
+              block_handle = ReleasePendingSendBlock(block_handle, send_block);
+
+              op.m_Size -= send_block->m_DataLen;
             }
             else
             {
+              send_block->m_DataLen -= op.m_Size;
+              send_block->m_DataStart = Marshal::MemOffset(send_block->m_DataStart, op.m_Size);
               break;
             }
           }
+
+          connection.m_PendingSendBlockStart = block_handle;
+          if (block_handle == InvalidBlockHandle)
+          {
+            connection.m_PendingSendBlockCur = block_handle;
+          }
+
+          TransmitConnectionPackets(connection_id);
         }
         else if (op.m_Type == StormSocketIOOperationType::ClearQueue)
         {
@@ -1285,12 +1251,11 @@ namespace StormSockets
 
           SignalCloseThread(connection_id);
         }
-        else if (op.m_Type == StormSocketIOOperationType::SendPacket)
+        else if (op.m_Type == StormSocketIOOperationType::QueuePacket)
         {
-          SendBuffer buffer_set;
           if (m_OutputQueue[connection_id].PeekTop(writer, connection_gen, m_OutputQueueIncdices.get(), m_OutputQueueArray.get(), 0))
           {
-            StormSocketFreeQueueElement free_queue_elem;
+            uint64_t prof = Profiling::StartProfiler();
 
 #ifndef DISABLE_MBED
             if (writer.m_IsEncrypted == false && connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
@@ -1304,110 +1269,124 @@ namespace StormSockets
             }
 #endif
 
-            int buffer_count = 0;
-            int packet_count = 0;
-            int send_offset = 0;
-            int total_send_length = 0;
+            StormFixedBlockHandle block_handle = writer.m_PacketInfo->m_StartBlock;;
+            int header_offset = writer.m_PacketInfo->m_SendOffset;
+            int pending_data = writer.m_PacketInfo->m_TotalLength;
 
-            while (buffer_count < kBufferSetCount)
+            while (block_handle != InvalidBlockHandle)
             {
-              if (connection.m_PendingRemainingData == 0)
+              int potential_data_in_block = m_FixedBlockSize - header_offset - (writer.m_ReservedHeaderLength + writer.m_ReservedTrailerLength);
+              int block_len = std::min(pending_data, potential_data_in_block);
+              int data_start = writer.m_ReservedHeaderLength - writer.m_HeaderLength + header_offset;
+              int data_length = writer.m_HeaderLength + block_len + writer.m_TrailerLength;
+
+              void * block = m_Allocator.ResolveHandle(block_handle);
+              block_handle = m_Allocator.GetNextBlock(block_handle);
+
+              StormFixedBlockHandle outgoing_block_handle = m_PendingSendBlocks.AllocateBlock(StormFixedBlockType::SendBlock);
+              StormPendingSendBlock * outgoing_block = (StormPendingSendBlock *)m_PendingSendBlocks.ResolveHandle(outgoing_block_handle);
+
+              outgoing_block->m_DataLen = data_length;
+              outgoing_block->m_DataStart = Marshal::MemOffset(block, data_start);
+
+              if (block_handle == InvalidBlockHandle)
               {
-                send_offset = writer.m_PacketInfo->m_SendOffset;
-                connection.m_PendingRemainingData = writer.m_PacketInfo->m_TotalLength;
-                connection.m_PendingSendBlock = writer.m_PacketInfo->m_StartBlock;
-              }
-
-              int remaining_data =
-                FillBufferSet(buffer_set, buffer_count, connection.m_PendingRemainingData, writer, send_offset, connection.m_PendingSendBlock);
-
-              total_send_length += connection.m_PendingRemainingData - remaining_data;
-              connection.m_PendingRemainingData = remaining_data;
-
-              packet_count++;
-
-              if (m_OutputQueue[connection_id].PeekTop(writer, connection_gen, m_OutputQueueIncdices.get(), m_OutputQueueArray.get(), packet_count) == false)
-              {
-                break;
-              }
-
-#ifndef DISABLE_MBED
-              if (writer.m_IsEncrypted == false && connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
-              {
-                StormMessageWriter encrypted = EncryptWriter(connection_id, writer);
-                m_OutputQueue[connection_id].ReplaceTop(encrypted, connection_gen, m_OutputQueueIncdices.get(), m_OutputQueueArray.get(), packet_count);
-
-                FreeOutgoingPacket(writer);
-
-                writer = encrypted;
-              }
-#endif
-            }
-
-            int advance_count;
-
-            // If we sent the max blocks worth of data and still have shit to send...
-            if (connection.m_PendingRemainingData > 0)
-            {
-              advance_count = packet_count - 1;
-              // Free every writer that got written to except for the last one
-              for (int index = 0; index < packet_count - 1; index++)
-              {
-                m_OutputQueue[connection_id].PeekTop(writer, connection_gen, m_OutputQueueIncdices.get(), m_OutputQueueArray.get(), index);
-                free_queue_elem.m_RequestWriter = writer;
-
-                if (m_FreeQueue[connection_id].Enqueue(free_queue_elem, connection_gen, m_FreeQueueIncdices.get(), m_FreeQueueArray.get()) == false)
-                {
-                  throw std::runtime_error("Free queue ran out of space");
-                }
-              }
-              // Requeue up this operation so that we don't block out the number of writers
-              if (m_SendQueue[thread_index].Enqueue(op, 0, m_SendQueueIncdices.get(), m_SendQueueArray.get()) == false)
-              {
-                throw std::runtime_error("Send queue ran out of space");
-              }
-            }
-            else
-            {
-              advance_count = packet_count;
-              // Just free everything
-              for (int index = 0; index < packet_count; index++)
-              {
-                m_OutputQueue[connection_id].PeekTop(writer, connection_gen, m_OutputQueueIncdices.get(), m_OutputQueueArray.get(), index);
-                free_queue_elem.m_RequestWriter = writer;
-
-                if (m_FreeQueue[connection_id].Enqueue(free_queue_elem, connection_gen, m_FreeQueueIncdices.get(), m_FreeQueueArray.get()) == false)
-                {
-                  throw std::runtime_error("Free queue ran out of space");
-                }
-              }
-            }
-
-            uint64_t prof = Profiling::StartProfiler();
-            auto send_callback = [=](const asio::error_code & error, std::size_t bytes_transfered)
-            {
-              if (!error)
-              {
-                SignalOutgoingSocket(connection_id, StormSocketIOOperationType::FreePacket, bytes_transfered);
+                outgoing_block->m_RefCount = &writer.m_PacketInfo->m_RefCount;
+                outgoing_block->m_StartBlock = writer.m_PacketInfo->m_StartBlock;
+                outgoing_block->m_PacketHandle = writer.m_PacketHandle;
               }
               else
               {
-                SetSocketDisconnected(connection_id);
+                outgoing_block->m_RefCount = nullptr;
               }
-            };
 
-            m_ClientSockets[connection_id]->async_send(buffer_set, send_callback);
+              if (connection.m_PendingSendBlockCur != InvalidBlockHandle)
+              {
+                m_PendingSendBlocks.SetNextBlock(connection.m_PendingSendBlockCur, outgoing_block_handle);
+              }
+              else
+              {
+                connection.m_PendingSendBlockStart = outgoing_block_handle;
+              }
+
+              connection.m_PendingSendBlockCur = outgoing_block_handle;
+
+              header_offset = 0;
+              pending_data -= block_len;
+            }
+
+            TransmitConnectionPackets(connection_id);
 
             Profiling::EndProfiler(prof, ProfilerCategory::kSend);
-
-            for (int index = 0; index < advance_count; index++)
-            {
-              m_OutputQueue[connection_id].Advance(connection_gen, m_OutputQueueIncdices.get(), m_OutputQueueArray.get());
-            }
           }
         }
       }
     }
+  }
+
+  void StormSocketBackend::TransmitConnectionPackets(StormSocketConnectionId connection_id)
+  {
+    auto & connection = GetConnection(connection_id);
+    if (connection.m_Transmitting)
+    {
+      return;
+    }
+
+    StormFixedBlockHandle block_handle = connection.m_PendingSendBlockStart;
+    if (block_handle == InvalidBlockHandle)
+    {
+      return;
+    }
+
+    SendBuffer buffer_set;
+    int buffer_size = 0;
+
+
+    for (buffer_size = 0; buffer_size < kBufferSetCount; buffer_size++)
+    {
+      if (block_handle == InvalidBlockHandle)
+      {
+        break;
+      }
+
+      StormPendingSendBlock * send_block = (StormPendingSendBlock *)m_PendingSendBlocks.ResolveHandle(block_handle);
+      buffer_set[buffer_size] = asio::buffer(send_block->m_DataStart, send_block->m_DataLen);
+      
+      block_handle = m_PendingSendBlocks.GetNextBlock(block_handle);
+    }
+
+    if (buffer_size > 0)
+    {
+      auto send_callback = [=](const asio::error_code & error, std::size_t bytes_transfered)
+      {
+        if (!error)
+        {
+          SignalOutgoingSocket(connection_id, StormSocketIOOperationType::FreePacket, bytes_transfered);
+        }
+        else
+        {
+          SetSocketDisconnected(connection_id);
+        }
+      };
+
+      connection.m_Transmitting = true;
+      m_ClientSockets[connection_id]->async_send(buffer_set, send_callback);
+    }
+  }
+
+
+  StormFixedBlockHandle StormSocketBackend::ReleasePendingSendBlock(StormFixedBlockHandle send_block_handle, StormPendingSendBlock * send_block)
+  {
+    if (send_block->m_RefCount)
+    {
+      if (send_block->m_RefCount->fetch_sub(1) == 1)
+      {
+        m_Allocator.FreeBlockChain(send_block->m_StartBlock, StormFixedBlockType::BlockMem);
+        m_MessageSenders.FreeBlock(send_block->m_PacketHandle, StormFixedBlockType::Sender);
+      }
+    }
+
+    return m_PendingSendBlocks.FreeBlock(send_block_handle, StormFixedBlockType::SendBlock);
   }
 
   void StormSocketBackend::ReleaseSendQueue(StormSocketConnectionId connection_id, int connection_gen)
@@ -1426,16 +1405,6 @@ namespace StormSockets
     }
 
     m_OutputQueue[connection_id].Reset(connection_gen + 1, m_OutputQueueIncdices.get(), m_OutputQueueArray.get());
-
-    m_FreeQueue[connection_id].Lock(connection_gen + 1, m_FreeQueueIncdices.get(), m_FreeQueueArray.get());
-    StormSocketFreeQueueElement free_elem;
-
-    while (m_FreeQueue[connection_id].TryDequeue(free_elem, connection_gen + 1, m_FreeQueueIncdices.get(), m_FreeQueueArray.get()))
-    {
-      FreeOutgoingPacket(free_elem.m_RequestWriter);
-    }
-
-    m_FreeQueue[connection_id].Reset(connection_gen + 1, m_FreeQueueIncdices.get(), m_FreeQueueArray.get());
   }
 
   StormMessageWriter StormSocketBackend::EncryptWriter(StormSocketConnectionId connection_id, StormMessageWriter & writer)
@@ -1519,14 +1488,20 @@ namespace StormSockets
 
   void StormSocketBackend::FreeConnectionResources(StormSocketConnectionId id)
   {
-#ifndef DISABLE_MBED
     auto & connection = GetConnection(id);
+#ifndef DISABLE_MBED
 
     if (connection.m_Frontend->UseSSL(id, connection.m_FrontendId))
     {
       mbedtls_ssl_free(&connection.m_SSLContext.m_SSLContext);
     }
 #endif
+
+    StormFixedBlockHandle block_handle = connection.m_PendingSendBlockStart;
+    while (block_handle != InvalidBlockHandle)
+    {
+      block_handle = ReleasePendingSendBlock(block_handle, (StormPendingSendBlock *)m_PendingSendBlocks.ResolveHandle(block_handle));
+    }
 
     m_ClientSockets[id]->close();
     m_ClientSockets[id] = std::experimental::optional<asio::ip::tcp::socket>();

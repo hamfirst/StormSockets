@@ -59,16 +59,17 @@ namespace StormSockets
     StormSocketBuffer m_RecvBuffer;
     StormSocketBuffer m_DecryptBuffer;
     StormFixedBlockHandle m_ParseBlock;
-    StormFixedBlockHandle m_PendingSendBlock;
     std::atomic_int m_UnparsedDataLength;
     int m_ParseOffset = 0;
     int m_ReadOffset = 0;
     int m_DisconnectFlags = 0;
     std::atomic_int m_PendingPackets;
     volatile int m_SlotGen = 0;
-    int m_PendingRemainingData = 0;
-    int m_PendingFreeData = 0;
     std::atomic_int m_RecvCriticalSection;
+
+    StormFixedBlockHandle m_PendingSendBlockStart;
+    StormFixedBlockHandle m_PendingSendBlockCur;
+    std::atomic_bool m_Transmitting;
 
     SSLContext m_SSLContext = {};
 

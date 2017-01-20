@@ -9,7 +9,7 @@ namespace StormSockets
   {
     enum Index
     {
-      SendPacket,
+      QueuePacket,
       FreePacket,
       ClearQueue,
       Close,

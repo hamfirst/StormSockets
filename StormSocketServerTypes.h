@@ -59,9 +59,9 @@ namespace StormSockets
     int BlockSize = 4096 - sizeof(StormFixedBlockHandle); // The default page size
 
     int MaxPendingOutgoingPacketsPerConnection = 32;
-    int MaxPendingFreeingPacketsPerConnection = 32;
     int MaxPendingIncomingPacketsPerConnection = 32;
     int MaxSendQueueElements = 32;
+    int MaxPendingSendBlocks = 1024 * 16;
     int HandshakeTimeout = 0;
   };
 

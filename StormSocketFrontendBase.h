@@ -54,7 +54,6 @@ namespace StormSockets
 
     int m_FixedBlockSize;
 		int m_MaxConnections;
-    int m_MaxPendingFrees;
 
 		// Queue that stores event data which is consumed by external code.  Events tell the user there was a connect or disconnect or new packet
 		StormMessageQueue<StormSocketEventInfo> m_EventQueue;
