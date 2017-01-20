@@ -29,15 +29,7 @@ namespace StormSockets
 {
   using StormSocketBackendAcceptorId = int;
 
-  struct StormPendingSendBlock
-  {
-    void * m_DataStart;
-    int m_DataLen;
-
-    StormFixedBlockHandle m_StartBlock;
-    StormFixedBlockHandle m_PacketHandle;
-    std::atomic_int * m_RefCount;
-  };
+  struct StormPendingSendBlock;
 
   class StormSocketBackend
   {

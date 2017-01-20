@@ -17,6 +17,17 @@
 
 namespace StormSockets
 {
+  struct StormPendingSendBlock
+  {
+    void * m_DataStart;
+    int m_DataLen;
+
+    StormFixedBlockHandle m_StartBlock;
+    StormFixedBlockHandle m_PacketHandle;
+    std::atomic_int * m_RefCount;
+  };
+
+
   StormSocketBackend::StormSocketBackend(const StormSocketInitSettings & settings) :
     m_Allocator(settings.HeapSize, settings.BlockSize, true),
     m_MessageReaders(settings.MaxPendingOutgoingPacketsPerConnection * sizeof(StormMessageReaderData) * settings.MaxConnections, sizeof(StormMessageReaderData), false),
