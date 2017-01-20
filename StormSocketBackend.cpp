@@ -1271,8 +1271,6 @@ namespace StormSockets
             if (writer.m_IsEncrypted == false && connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
             {
               StormMessageWriter encrypted = EncryptWriter(connection_id, writer);
-              m_OutputQueue[connection_id].ReplaceTop(encrypted, connection_gen, m_OutputQueueIncdices.get(), m_OutputQueueArray.get(), 0);
-
               FreeOutgoingPacket(writer);
 
               writer = encrypted;
