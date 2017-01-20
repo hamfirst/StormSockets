@@ -1223,7 +1223,6 @@ namespace StormSockets
             if (op.m_Size >= send_block->m_DataLen)
             {
               block_handle = ReleasePendingSendBlock(block_handle, send_block);
-
               op.m_Size -= send_block->m_DataLen;
             }
             else
@@ -1264,7 +1263,7 @@ namespace StormSockets
         }
         else if (op.m_Type == StormSocketIOOperationType::QueuePacket)
         {
-          if (m_OutputQueue[connection_id].PeekTop(writer, connection_gen, m_OutputQueueIncdices.get(), m_OutputQueueArray.get(), 0))
+          if (m_OutputQueue[connection_id].TryDequeue(writer, connection_gen, m_OutputQueueIncdices.get(), m_OutputQueueArray.get()))
           {
             uint64_t prof = Profiling::StartProfiler();
 
