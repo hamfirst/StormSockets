@@ -1345,6 +1345,11 @@ namespace StormSockets
       return;
     }
 
+    if ((connection.m_DisconnectFlags & (int)StormSocketDisconnectFlags::kSignalClose) != 0)
+    {
+      return;
+    }
+
     StormFixedBlockHandle block_handle = connection.m_PendingSendBlockStart;
     if (block_handle == InvalidBlockHandle)
     {
