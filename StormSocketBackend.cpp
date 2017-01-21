@@ -619,7 +619,6 @@ namespace StormSockets
 #endif
 
       // Free any pent up packets
-      FreeConnectionResources(id);
       connection.m_Frontend->CleanupConnection(id, connection.m_FrontendId);
       connection.m_Frontend->FreeFrontendId(connection.m_FrontendId);
       connection.m_Frontend->DisassociateConnectionId(id);
@@ -629,6 +628,7 @@ namespace StormSockets
       connection.m_DecryptBuffer.FreeBuffers();
 
       connection.m_SlotGen = (connection.m_SlotGen + 1) & 0xFF;
+      FreeConnectionResources(id);
 
       if (m_HandshakeTimeout > 0)
       {
@@ -1517,6 +1517,6 @@ namespace StormSockets
     }
 
     m_ClientSockets[id]->close();
-    m_ClientSockets[id] = std::experimental::optional<asio::ip::tcp::socket>();
+    m_ClientSockets[id] = std::experimental::nullopt;
   }
 }
