@@ -1208,6 +1208,11 @@ namespace StormSockets
 
         if (op.m_Type == StormSocketIOOperationType::FreePacket)
         {
+          if (connection_gen != connection.m_SlotGen)
+          {
+            continue;
+          }
+
           connection.m_Transmitting = false;
 
           StormFixedBlockHandle block_handle = connection.m_PendingSendBlockStart;
