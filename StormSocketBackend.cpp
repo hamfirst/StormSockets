@@ -1264,10 +1264,21 @@ namespace StormSockets
             continue;
           }
 
+          m_ClientSockets[connection_id]->shutdown(asio::socket_base::shutdown_send);
           SignalCloseThread(connection_id);
         }
         else if (op.m_Type == StormSocketIOOperationType::QueuePacket)
         {
+          if (connection_gen != connection.m_SlotGen)
+          {
+            continue;
+          }
+
+          if ((connection.m_DisconnectFlags & StormSocketDisconnectFlags::kSendThread) != 0)
+          {
+            continue;
+          }
+
           if (m_OutputQueue[connection_id].TryDequeue(writer, connection_gen, m_OutputQueueIncdices.get(), m_OutputQueueArray.get()))
           {
             uint64_t prof = Profiling::StartProfiler();
@@ -1501,7 +1512,7 @@ namespace StormSockets
   void StormSocketBackend::CloseSocket(StormSocketConnectionId id)
   {
     asio::error_code ec;
-    m_ClientSockets[id]->close(ec);
+    m_ClientSockets[id]->shutdown(asio::socket_base::shutdown_receive);
   }
 
   void StormSocketBackend::FreeConnectionResources(StormSocketConnectionId id)
