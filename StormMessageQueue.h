@@ -208,7 +208,7 @@ namespace StormSockets
 
 			for (int index = m_Offset; index < m_EndIndex; index++)
 			{
-				queue[index] = StormGenIndex(-1, 0);
+				queue[index] = StormGenIndex(-m_Cycles, 0);
 				array[index].HasData.Raw = 0;
 			}
 		}
@@ -279,6 +279,8 @@ namespace StormSockets
 			// Next allocate a queue slot that links to the data
 			while (true)
 			{
+        std::atomic_thread_fence(std::memory_order_seq_cst);
+
 				StormDoubleGenIndex old_head = m_Head;
 				if (old_head.GetGen1() != gen)
 				{
