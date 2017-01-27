@@ -1215,12 +1215,14 @@ namespace StormSockets
 
           connection.m_Transmitting = false;
 
+          bool bail = false;
+
           StormFixedBlockHandle block_handle = connection.m_PendingSendBlockStart;
           while (op.m_Size > 0)
           {
             if (block_handle == InvalidBlockHandle)
             {
-              throw std::runtime_error("Sent more data than was in buffer");
+              bail = true;
             }
 
             StormPendingSendBlock * send_block = (StormPendingSendBlock *)m_PendingSendBlocks.ResolveHandle(block_handle);
@@ -1238,13 +1240,16 @@ namespace StormSockets
             }
           }
 
-          connection.m_PendingSendBlockStart = block_handle;
-          if (block_handle == InvalidBlockHandle)
+          if (bail == false)
           {
-            connection.m_PendingSendBlockCur = block_handle;
-          }
+            connection.m_PendingSendBlockStart = block_handle;
+            if (block_handle == InvalidBlockHandle)
+            {
+              connection.m_PendingSendBlockCur = block_handle;
+            }
 
-          TransmitConnectionPackets(connection_id);
+            TransmitConnectionPackets(connection_id);
+          }
         }
         else if (op.m_Type == StormSocketIOOperationType::ClearQueue)
         {
@@ -1512,7 +1517,7 @@ namespace StormSockets
   void StormSocketBackend::CloseSocket(StormSocketConnectionId id)
   {
     asio::error_code ec;
-    m_ClientSockets[id]->shutdown(asio::socket_base::shutdown_receive, ec);
+    m_ClientSockets[id]->shutdown(asio::socket_base::shutdown_receive);
   }
 
   void StormSocketBackend::FreeConnectionResources(StormSocketConnectionId id)
