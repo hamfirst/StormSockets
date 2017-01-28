@@ -29,7 +29,7 @@ namespace StormSockets
 
 
   StormSocketBackend::StormSocketBackend(const StormSocketInitSettings & settings) :
-    m_Allocator(settings.HeapSize, settings.BlockSize, true),
+    m_Allocator(settings.HeapSize, settings.BlockSize, false),
     m_MessageReaders(settings.MaxPendingOutgoingPacketsPerConnection * sizeof(StormMessageReaderData) * settings.MaxConnections, sizeof(StormMessageReaderData), false),
     m_MessageSenders(settings.MaxPendingOutgoingPacketsPerConnection * sizeof(StormMessageWriterData) * settings.MaxConnections, sizeof(StormMessageWriterData), false),
     m_PendingSendBlocks(settings.MaxPendingSendBlocks, sizeof(StormPendingSendBlock), false),
