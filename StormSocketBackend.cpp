@@ -1517,7 +1517,7 @@ namespace StormSockets
   void StormSocketBackend::CloseSocket(StormSocketConnectionId id)
   {
     asio::error_code ec;
-    m_ClientSockets[id]->shutdown(asio::socket_base::shutdown_receive);
+    m_ClientSockets[id]->shutdown(asio::socket_base::shutdown_receive, ec);
   }
 
   void StormSocketBackend::FreeConnectionResources(StormSocketConnectionId id)
