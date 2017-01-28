@@ -64,6 +64,11 @@ namespace StormSockets
 			Raw = (index & 0x000FFFFF) | (v1 << 24) | (v2 << 20);
 		}
 
+    StormDoubleGenIndex(const StormDoubleGenIndex & rhs)
+    {
+      Raw = rhs.Raw;
+    }
+
 		int GetIndex() const
 		{
 			int raw = Raw;
