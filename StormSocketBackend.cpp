@@ -762,6 +762,11 @@ namespace StormSockets
 
   void StormSocketBackend::AcceptNewConnection(const asio::error_code & error, StormSocketBackendAcceptorId acceptor_id)
   {
+    if (error)
+    {
+      return;
+    }
+
     std::unique_lock<std::mutex> guard(m_AcceptorLock);
 
     auto acceptor_itr = m_Acceptors.find(acceptor_id);
@@ -771,8 +776,6 @@ namespace StormSockets
     }
 
     auto & acceptor = acceptor_itr->second;
-
-    printf("Backend got a connection\n");
 
     StormSocketConnectionId connection_id = AllocateConnection(acceptor.m_Frontend, 
       acceptor.m_AcceptEndpoint.address().to_v4().to_ulong(), acceptor.m_AcceptEndpoint.port(), false, nullptr);
@@ -1033,8 +1036,8 @@ namespace StormSockets
 #endif
       {
         // Data just goes directly into the recv buffer
-        connection.m_UnparsedDataLength.fetch_add((int)bytes_received);
         connection.m_RecvBuffer.GotData((int)bytes_received);
+        connection.m_UnparsedDataLength.fetch_add((int)bytes_received);
       }
 
       PrepareToRecv(connection_id);
@@ -1158,7 +1161,6 @@ namespace StormSockets
 
   void StormSocketBackend::IOThreadMain()
   {
-    printf("Starting recv thread\n");
     while (m_ThreadStopRequested == false)
     {
       if (m_IOService.run() == 0)

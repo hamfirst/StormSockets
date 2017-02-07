@@ -243,8 +243,6 @@ namespace StormSockets
     StormMessageReaderCursor uri_cursor = request_line;
     int uri_len = 0;
 
-    printf("Got http request: ");
-
     while (request_line.GetRemainingLength() > 0)
     {
       auto c = request_line.PeekByte();
@@ -258,8 +256,6 @@ namespace StormSockets
       uri_len++;
       request_line.Advance(1);
     }
-
-    printf("\n");
 
     http_connection.m_RequestURI = StormMessageReaderCursor(uri_cursor, uri_len);
     if (request_line.GetRemainingLength() == 0 || request_line.ReadByte() != ' ')
