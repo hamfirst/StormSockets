@@ -126,7 +126,7 @@ namespace StormSockets
 
 		bool HasData()
 		{
-			return m_Tail != m_Head;
+			return m_Tail != m_Head.GetIndex();
 		}
 
 		bool TryDequeue(T & output)
