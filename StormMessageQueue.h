@@ -180,7 +180,7 @@ namespace StormSockets
 
             StormGenIndex new_head_index = StormGenIndex(new_head, new_head_cycles);
 
-            if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head, &idx, (int)new_head_index.Raw))
+            if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head, (int *)&old_head.Raw, (int)new_head_index.Raw))
             {
               return true;
             }
