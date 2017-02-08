@@ -320,7 +320,6 @@ namespace StormSockets
 					// Finally, advance the queue head by one
 					while (true)
 					{
-						old_head = m_Head;
 						int new_head_index = (old_head.GetIndex() + 1) % m_Size;
 						int new_gen_2 = (new_head_index != 0 ? old_head.GetGen2() : old_head.GetGen2() + 2) & 0xF;
 
@@ -338,6 +337,8 @@ namespace StormSockets
 							Profiling::EndProfiler(prof, ProfilerCategory::kEnqueue);
 							return true;
 						}
+
+            std::this_thread::yield();
 					}
 				}
 			}

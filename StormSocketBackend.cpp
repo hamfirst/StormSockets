@@ -762,6 +762,11 @@ namespace StormSockets
 
   void StormSocketBackend::AcceptNewConnection(const asio::error_code & error, StormSocketBackendAcceptorId acceptor_id)
   {
+    if (error)
+    {
+      return;
+    }
+
     std::unique_lock<std::mutex> guard(m_AcceptorLock);
 
     auto acceptor_itr = m_Acceptors.find(acceptor_id);
