@@ -165,16 +165,8 @@ namespace StormSockets
         int old_val = -1;
         if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Queue[idx], &old_val, message_index))
         {
-          while (true)
-          {
-            idx = m_Head;
-            new_head = (idx + 1) % m_Length;
-
-            if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head, &idx, new_head))
-            {
-              return true;
-            }
-          }
+          m_Head = idx;
+          return true;
         }
       }
     }
