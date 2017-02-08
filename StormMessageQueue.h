@@ -4,6 +4,7 @@
 
 #include <atomic>
 #include <memory>
+#include <thread>
 #include <stdint.h>
 
 #include "StormProfiling.h"
