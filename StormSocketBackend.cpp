@@ -340,7 +340,7 @@ namespace StormSockets
         return;
       }
 
-      if (connection.m_DisconnectFlags != 0)
+      if ((connection.m_DisconnectFlags & StormSocketDisconnectFlags::kTerminateFlags) != 0)
       {
         ReleasePacketSlot(id);
         writer.m_PacketInfo->m_RefCount.fetch_sub(1);
@@ -394,7 +394,7 @@ namespace StormSockets
         return;
       }
 
-      if (connection.m_DisconnectFlags != 0)
+      if ((connection.m_DisconnectFlags & StormSocketDisconnectFlags::kTerminateFlags) != 0)
       {
         ReleasePacketSlot(id, 2);
         header_writer.m_PacketInfo->m_RefCount.fetch_sub(1);
@@ -414,7 +414,7 @@ namespace StormSockets
         return;
       }
 
-      if (connection.m_DisconnectFlags != 0)
+      if ((connection.m_DisconnectFlags & StormSocketDisconnectFlags::kTerminateFlags) != 0)
       {
         ReleasePacketSlot(id);
         body_writer.m_PacketInfo->m_RefCount.fetch_sub(1);
@@ -771,8 +771,6 @@ namespace StormSockets
     }
 
     auto & acceptor = acceptor_itr->second;
-
-    printf("Backend got a connection\n");
 
     StormSocketConnectionId connection_id = AllocateConnection(acceptor.m_Frontend, 
       acceptor.m_AcceptEndpoint.address().to_v4().to_ulong(), acceptor.m_AcceptEndpoint.port(), false, nullptr);
@@ -1158,7 +1156,6 @@ namespace StormSockets
 
   void StormSocketBackend::IOThreadMain()
   {
-    printf("Starting recv thread\n");
     while (m_ThreadStopRequested == false)
     {
       if (m_IOService.run() == 0)
@@ -1223,14 +1220,15 @@ namespace StormSockets
             if (block_handle == InvalidBlockHandle)
             {
               bail = true;
+              break;
             }
 
             StormPendingSendBlock * send_block = (StormPendingSendBlock *)m_PendingSendBlocks.ResolveHandle(block_handle);
 
             if (op.m_Size >= send_block->m_DataLen)
             {
-              block_handle = ReleasePendingSendBlock(block_handle, send_block);
               op.m_Size -= send_block->m_DataLen;
+              block_handle = ReleasePendingSendBlock(block_handle, send_block);
             }
             else
             {
