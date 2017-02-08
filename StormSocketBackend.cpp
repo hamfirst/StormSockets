@@ -340,7 +340,7 @@ namespace StormSockets
         return;
       }
 
-      if (connection.m_DisconnectFlags != 0)
+      if ((connection.m_DisconnectFlags & StormSocketDisconnectFlags::kTerminateFlags) != 0)
       {
         ReleasePacketSlot(id);
         writer.m_PacketInfo->m_RefCount.fetch_sub(1);
@@ -394,7 +394,7 @@ namespace StormSockets
         return;
       }
 
-      if (connection.m_DisconnectFlags != 0)
+      if ((connection.m_DisconnectFlags & StormSocketDisconnectFlags::kTerminateFlags) != 0)
       {
         ReleasePacketSlot(id, 2);
         header_writer.m_PacketInfo->m_RefCount.fetch_sub(1);
@@ -414,7 +414,7 @@ namespace StormSockets
         return;
       }
 
-      if (connection.m_DisconnectFlags != 0)
+      if ((connection.m_DisconnectFlags & StormSocketDisconnectFlags::kTerminateFlags) != 0)
       {
         ReleasePacketSlot(id);
         body_writer.m_PacketInfo->m_RefCount.fetch_sub(1);
@@ -1225,14 +1225,15 @@ namespace StormSockets
             if (block_handle == InvalidBlockHandle)
             {
               bail = true;
+              break;
             }
 
             StormPendingSendBlock * send_block = (StormPendingSendBlock *)m_PendingSendBlocks.ResolveHandle(block_handle);
 
             if (op.m_Size >= send_block->m_DataLen)
             {
-              block_handle = ReleasePendingSendBlock(block_handle, send_block);
               op.m_Size -= send_block->m_DataLen;
+              block_handle = ReleasePendingSendBlock(block_handle, send_block);
             }
             else
             {

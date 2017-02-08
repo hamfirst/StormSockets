@@ -4,6 +4,7 @@
 
 #include <atomic>
 #include <memory>
+#include <thread>
 #include <stdint.h>
 
 #include "StormProfiling.h"
@@ -28,8 +29,9 @@ namespace StormSockets
 	class StormMessageQueue
 	{
 	private:
+    StormGenIndex m_Head;
 		volatile int m_Tail;
-		volatile int m_Head;
+    volatile int m_Cycles;
 		std::unique_ptr<int[]> m_Queue;
 		std::unique_ptr<StormMessageContainer<T>[]> m_Array;
 		int m_Length;
@@ -38,7 +40,8 @@ namespace StormSockets
 		StormMessageQueue(int size)
 		{
       m_Tail = 0;
-      m_Head = 0;
+      m_Head = StormGenIndex(0, 1);
+      m_Cycles = 1;
 
 			m_Queue = std::make_unique<int[]>(size);
 			m_Array = std::make_unique<StormMessageContainer<T>[]>(size);
@@ -47,7 +50,7 @@ namespace StormSockets
 			for (int index = 0; index < size; index++)
 			{
 				m_Array[index].HasData = 0;
-				m_Queue[index] = -1;
+        m_Queue[index] = -m_Cycles;
 			}
 		}
 
@@ -76,11 +79,12 @@ namespace StormSockets
 		void Reset()
 		{
 			m_Tail = 0;
-			m_Head = 0;
+      m_Head = StormGenIndex(0, 1);
+      m_Cycles = 1;
 
 			for (int index = 0; index < m_Length; index++)
 			{
-				m_Queue[index] = -1;
+				m_Queue[index] = -m_Cycles;
 			}
 		}
 
@@ -127,25 +131,26 @@ namespace StormSockets
 
 		bool TryDequeue(T & output)
 		{
-			while (true)
+			int idx = m_Tail;
+			if (idx == m_Head.GetIndex())
 			{
-				int idx = m_Tail;
-				if (idx == m_Head)
-				{
-					return false;
-				}
-
-				int val = m_Queue[idx];
-				int new_tail = (idx + 1) % m_Length;
-
-				if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Tail, &idx, new_tail))
-				{
-					m_Queue[idx] = -1;
-					output = std::move(m_Array[val].MessageInfo);
-					m_Array[val].HasData = 0;
-					return true;
-				}
+				return false;
 			}
+
+      if (idx == 0)
+      {
+        int new_cycles = (m_Cycles + 2) & 0xF;
+        m_Cycles = new_cycles;
+      }
+
+			int val = m_Queue[idx];
+			int new_tail = (idx + 1) % m_Length;
+
+      output = m_Array[val].MessageInfo;
+      m_Queue[idx] = -m_Cycles;
+			m_Array[val].HasData = 0;
+      m_Tail = new_tail;
+			return true;
 		}
 
   private:
@@ -154,22 +159,28 @@ namespace StormSockets
     {
       while (true)
       {
-        int idx = m_Head;
+        auto old_head = StormGenIndex(m_Head);
+
+        int idx = old_head.GetIndex();
+        int start_cycles = old_head.GetGen();
+
         int new_head = (idx + 1) % m_Length;
         if (new_head == m_Tail)
         {
           return false;
         }
 
-        int old_val = -1;
+        int old_val = -start_cycles;
         if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Queue[idx], &old_val, message_index))
         {
           while (true)
           {
-            idx = m_Head;
             new_head = (idx + 1) % m_Length;
+            int new_head_cycles = (new_head != 0 ? old_head.GetGen() : old_head.GetGen() + 2) & 0xF;
 
-            if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head, &idx, new_head))
+            StormGenIndex new_head_index = StormGenIndex(new_head, new_head_cycles);
+
+            if (std::atomic_compare_exchange_weak((std::atomic_int *)&m_Head, &idx, (int)new_head_index.Raw))
             {
               return true;
             }
@@ -320,7 +331,6 @@ namespace StormSockets
 					// Finally, advance the queue head by one
 					while (true)
 					{
-						old_head = m_Head;
 						int new_head_index = (old_head.GetIndex() + 1) % m_Size;
 						int new_gen_2 = (new_head_index != 0 ? old_head.GetGen2() : old_head.GetGen2() + 2) & 0xF;
 
@@ -338,6 +348,8 @@ namespace StormSockets
 							Profiling::EndProfiler(prof, ProfilerCategory::kEnqueue);
 							return true;
 						}
+
+            std::this_thread::yield();
 					}
 				}
 			}

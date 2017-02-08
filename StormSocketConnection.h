@@ -22,6 +22,7 @@ namespace StormSockets
 			kRemoteClose = 0x0010,
 			kThreadClose = 0x0020,
       kConnectFinished = 0x0040,
+      kTerminateFlags = kMainThread | kRecvThread | kSendThread | kLocalClose | kRemoteClose | kThreadClose,
 			kAllFlags = kMainThread | kRecvThread | kSendThread | kLocalClose | kRemoteClose | kThreadClose | kConnectFinished,
 			kCloseFlags = kRemoteClose | kLocalClose,
 			kSocket = 0x0080,
