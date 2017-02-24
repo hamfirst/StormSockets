@@ -1066,6 +1066,10 @@ namespace StormSockets
     else
     {
       connection.m_RecvFailure = true;
+
+      uint64_t prof = Profiling::StartProfiler();
+      TryProcessReceivedData(connection_id);
+      Profiling::EndProfiler(prof, ProfilerCategory::kProcData);
     }
   }
 
