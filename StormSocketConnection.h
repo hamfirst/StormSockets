@@ -85,5 +85,7 @@ namespace StormSockets
     std::atomic_bool m_HandshakeComplete;
 
     volatile bool m_FailedConnection = false;
+    volatile bool m_Closing = false;
+    volatile bool m_RecvFailure = false;
   };
 }

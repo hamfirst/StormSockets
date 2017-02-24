@@ -14,6 +14,7 @@ namespace StormSockets
     StormFixedBlockAllocator m_ConnectionAllocator;
     StormSocketServerSSLData m_SSLData;
     bool m_UseSSL;
+    int m_Port;
 
     StormSocketBackendAcceptorId m_AcceptorId;
 

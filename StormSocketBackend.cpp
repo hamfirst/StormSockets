@@ -146,7 +146,7 @@ namespace StormSockets
     acceptor.m_Acceptor.open(asio::ip::tcp::v4());
     acceptor.m_Acceptor.set_option(asio::ip::tcp::no_delay(true));
     acceptor.m_Acceptor.set_option(asio::socket_base::reuse_address(true));
-    acceptor.m_Acceptor.bind(endpoint);    
+    acceptor.m_Acceptor.bind(endpoint);
     acceptor.m_Acceptor.listen();
 
     guard.unlock();
@@ -199,7 +199,7 @@ namespace StormSockets
           while (itr != asio::ip::tcp::resolver::iterator())
           {
             asio::ip::tcp::endpoint ep = *itr;
-            
+
             if (ep.protocol() == ep.protocol().v4())
             {
 
@@ -484,6 +484,11 @@ namespace StormSockets
     {
       connection.m_ParseBlock = m_Allocator.GetNextBlock(connection.m_ParseBlock);
       connection.m_ParseOffset -= m_FixedBlockSize;
+
+      if (connection.m_ParseBlock == InvalidBlockHandle)
+      {
+        connection.m_ParseBlock = connection.m_RecvBuffer.m_BlockStart;
+      }
     }
 
     connection.m_UnparsedDataLength.fetch_sub(amount);
@@ -545,6 +550,11 @@ namespace StormSockets
       int new_flags = cur_flags | StormSocketDisconnectFlags::kSocket | StormSocketDisconnectFlags::kLocalClose | StormSocketDisconnectFlags::kRemoteClose;
       if (std::atomic_compare_exchange_weak((std::atomic_int *)&connection.m_DisconnectFlags, (int *)&cur_flags, (int)new_flags))
       {
+        if (connection.m_PendingSendBlockStart != InvalidBlockHandle)
+        {
+          //printf("bad\n");
+        }
+
         // Tell the sending thread to flush the queue
         SignalOutgoingSocket(id, StormSocketIOOperationType::ClearQueue);
 
@@ -600,6 +610,11 @@ namespace StormSockets
 
         if (flags == StormSocketDisconnectFlags::kSignalClose)
         {
+          if (connection.m_PendingSendBlockStart != InvalidBlockHandle)
+          {
+            //printf("bad\n");
+          }
+
           QueueCloseSocket(id);
           connection.m_FailedConnection = true;
         }
@@ -686,6 +701,8 @@ namespace StormSockets
         connection.m_PacketsSent = 0;
         connection.m_HandshakeComplete = false;
         connection.m_FailedConnection = false;
+        connection.m_Closing = false;
+        connection.m_RecvFailure = false;
 
         connection.m_RecvBuffer.InitBuffers();
 #ifndef DISABLE_MBED
@@ -698,7 +715,7 @@ namespace StormSockets
 
         if (m_HandshakeTimeout > 0)
         {
-          auto handler = [=, slot_gen=connection.m_SlotGen](const asio::error_code& error)
+          auto handler = [=, slot_gen = connection.m_SlotGen](const asio::error_code& error)
           {
             if (!error)
             {
@@ -751,10 +768,10 @@ namespace StormSockets
 
     auto & acceptor = acceptor_itr->second;
 
-    auto accept_callback = [this, acceptor_id](const asio::error_code & error) 
-    { 
-      AcceptNewConnection(error, acceptor_id); 
-      PrepareToAccept(acceptor_id); 
+    auto accept_callback = [this, acceptor_id](const asio::error_code & error)
+    {
+      AcceptNewConnection(error, acceptor_id);
+      PrepareToAccept(acceptor_id);
     };
 
     acceptor.m_Acceptor.async_accept(acceptor.m_AcceptSocket, acceptor.m_AcceptEndpoint, accept_callback);
@@ -777,7 +794,7 @@ namespace StormSockets
 
     auto & acceptor = acceptor_itr->second;
 
-    StormSocketConnectionId connection_id = AllocateConnection(acceptor.m_Frontend, 
+    StormSocketConnectionId connection_id = AllocateConnection(acceptor.m_Frontend,
       acceptor.m_AcceptEndpoint.address().to_v4().to_ulong(), acceptor.m_AcceptEndpoint.port(), false, nullptr);
 
     if (connection_id == StormSocketConnectionId::InvalidConnectionId)
@@ -1048,8 +1065,7 @@ namespace StormSockets
     }
     else
     {
-      SetSocketDisconnected(connection_id);
-      SetDisconnectFlag(connection_id, StormSocketDisconnectFlags::kRecvThread);
+      connection.m_RecvFailure = true;
     }
   }
 
@@ -1058,7 +1074,7 @@ namespace StormSockets
   {
     if (ProcessReceivedData(connection_id) == false)
     {
-      auto recheck_callback = [=]() 
+      auto recheck_callback = [=]()
       {
         TryProcessReceivedData(connection_id);
       };
@@ -1133,6 +1149,14 @@ namespace StormSockets
     bool success = connection.m_Frontend->ProcessData(connection_id, connection.m_FrontendId);
 
     connection.m_RecvCriticalSection.store(0);
+
+    if (connection.m_RecvFailure)
+    {
+      SetSocketDisconnected(connection_id);
+      SetDisconnectFlag(connection_id, StormSocketDisconnectFlags::kRecvThread);
+      success = true;
+    }
+
     return success;
   }
 
@@ -1149,7 +1173,7 @@ namespace StormSockets
     void * buffer_start =
       Marshal::MemOffset(m_Allocator.ResolveHandle(buffer->m_BlockCur), buffer->m_WriteOffset);
 
-    std::array<asio::mutable_buffer, 2> buffer_set = 
+    std::array<asio::mutable_buffer, 2> buffer_set =
     {
       asio::buffer(buffer_start, m_FixedBlockSize - buffer->m_WriteOffset),
       asio::buffer(m_Allocator.ResolveHandle(buffer->m_BlockNext), m_FixedBlockSize)
@@ -1249,6 +1273,12 @@ namespace StormSockets
             if (block_handle == InvalidBlockHandle)
             {
               connection.m_PendingSendBlockCur = block_handle;
+
+              if (connection.m_Closing)
+              {
+                m_ClientSockets[connection_id]->shutdown(asio::socket_base::shutdown_send);
+                SignalCloseThread(connection_id);
+              }
             }
 
             TransmitConnectionPackets(connection_id);
@@ -1272,8 +1302,12 @@ namespace StormSockets
             continue;
           }
 
-          m_ClientSockets[connection_id]->shutdown(asio::socket_base::shutdown_send);
-          SignalCloseThread(connection_id);
+          connection.m_Closing = true;
+          if (connection.m_PendingSendBlockStart == InvalidBlockHandle)
+          {
+            m_ClientSockets[connection_id]->shutdown(asio::socket_base::shutdown_send);
+            SignalCloseThread(connection_id);
+          }
         }
         else if (op.m_Type == StormSocketIOOperationType::QueuePacket)
         {
@@ -1283,6 +1317,11 @@ namespace StormSockets
           }
 
           if ((connection.m_DisconnectFlags & StormSocketDisconnectFlags::kSendThread) != 0)
+          {
+            continue;
+          }
+
+          if (connection.m_Closing)
           {
             continue;
           }
@@ -1377,6 +1416,7 @@ namespace StormSockets
 
     SendBuffer buffer_set;
     int buffer_size = 0;
+    int total_size = 0;
 
 
     for (buffer_size = 0; buffer_size < kBufferSetCount; buffer_size++)
@@ -1388,7 +1428,8 @@ namespace StormSockets
 
       StormPendingSendBlock * send_block = (StormPendingSendBlock *)m_PendingSendBlocks.ResolveHandle(block_handle);
       buffer_set[buffer_size] = asio::buffer(send_block->m_DataStart, send_block->m_DataLen);
-      
+      total_size += send_block->m_DataLen;
+
       block_handle = m_PendingSendBlocks.GetNextBlock(block_handle);
     }
 
@@ -1496,6 +1537,11 @@ namespace StormSockets
 
       while (m_ClosingConnectionQueue.TryDequeue(id))
       {
+        if (m_Connections[id].m_PendingSendBlockStart != InvalidBlockHandle)
+        {
+          //printf("bad\n");
+        }
+
         CloseSocket(id);
         SetSocketDisconnected(id);
         SetDisconnectFlag(id, StormSocketDisconnectFlags::kThreadClose);

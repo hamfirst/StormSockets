@@ -14,6 +14,7 @@ namespace StormSockets
 
     m_UseSSL = InitServerSSL(settings.SSLSettings, m_SSLData);
     m_AcceptorId = m_Backend->InitAcceptor(this, settings.ListenSettings);
+    m_Port = settings.ListenSettings.Port;
   }
 
   StormSocketServerFrontendWebsocket::~StormSocketServerFrontendWebsocket()
@@ -40,6 +41,7 @@ namespace StormSockets
     {
       return InvalidFrontendId;
     }
+
 
     StormSocketServerConnectionWebSocket * ptr = (StormSocketServerConnectionWebSocket *)m_ConnectionAllocator.ResolveHandle(handle);
     new (ptr) StormSocketServerConnectionWebSocket();
