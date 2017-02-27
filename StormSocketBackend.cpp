@@ -1280,7 +1280,8 @@ namespace StormSockets
 
               if (connection.m_Closing)
               {
-                m_ClientSockets[connection_id]->shutdown(asio::socket_base::shutdown_send);
+                asio::error_code ec;
+                m_ClientSockets[connection_id]->shutdown(asio::socket_base::shutdown_send, ec);
                 SignalCloseThread(connection_id);
               }
             }
@@ -1309,7 +1310,8 @@ namespace StormSockets
           connection.m_Closing = true;
           if (connection.m_PendingSendBlockStart == InvalidBlockHandle)
           {
-            m_ClientSockets[connection_id]->shutdown(asio::socket_base::shutdown_send);
+            asio::error_code ec;
+            m_ClientSockets[connection_id]->shutdown(asio::socket_base::shutdown_send, ec);
             SignalCloseThread(connection_id);
           }
         }
