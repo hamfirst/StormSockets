@@ -33,6 +33,7 @@ namespace StormSockets
     void FinalizeOutgoingResponse(StormHttpResponseWriter & writer, bool write_content_length);
     void SendResponse(StormSocketConnectionId connection_id, StormHttpResponseWriter & writer);
     void FreeOutgoingResponse(StormHttpResponseWriter & writer);
+    void FreeIncomingRequest(StormHttpRequestReader & reader);
 
   protected:
 

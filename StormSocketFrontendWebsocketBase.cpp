@@ -61,7 +61,6 @@ namespace StormSockets
     m_Backend->DiscardReaderData(reader.m_ConnectionId, reader.m_PacketDataLen);
   }
 
-
   bool StormSocketFrontendWebsocketBase::ProcessWebsocketData(StormSocketConnectionBase & connection, StormWebsocketConnectionBase & ws_connection, StormSocketConnectionId connection_id)
   {
     while (true)

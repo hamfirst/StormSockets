@@ -45,6 +45,12 @@ namespace StormSockets
     m_Backend->FreeOutgoingHttpResponse(writer);
   }
 
+  void StormSocketServerFrontendHttp::FreeIncomingRequest(StormHttpRequestReader & reader)
+  {
+    reader.FreeChain();
+    m_Backend->DiscardReaderData(reader.m_ConnectionId, reader.m_FullDataLen);
+  }
+
   StormSocketServerConnectionHttp & StormSocketServerFrontendHttp::GetHttpConnection(StormSocketFrontendConnectionId id)
   {
     StormSocketServerConnectionHttp * ptr = (StormSocketServerConnectionHttp *)m_ConnectionAllocator.ResolveHandle(id);

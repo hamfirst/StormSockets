@@ -48,6 +48,7 @@ namespace StormSockets
     unsigned int m_NumBlocks;
     unsigned int m_BlockSize;
     unsigned int m_MemoryBlockSize;
+    unsigned int m_OustandingMallocs;
     bool m_UseVirtual;
 
   public:
@@ -56,6 +57,7 @@ namespace StormSockets
     ~StormFixedBlockAllocator();
 
     int GetBlockSize() { return m_BlockSize; }
+    int GetOutstandingMallocs() { return m_OustandingMallocs; }
 
   private:
     void * AllocateBlockInternal(StormFixedBlockType::Index type, StormFixedBlockHandle & handle);

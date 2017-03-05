@@ -62,6 +62,7 @@ namespace StormSockets
 
   void StormSocketClientFrontendHttp::FreeIncomingHttpResponse(StormHttpResponseReader & reader)
   {
+    reader.FreeChain();
     m_Backend->DiscardReaderData(reader.m_ConnectionId, reader.m_FullDataLen);
   }
 

@@ -95,6 +95,8 @@ namespace StormSockets
     StormSocketBackend(const StormSocketInitSettings & settings);
     virtual ~StormSocketBackend();
 
+    std::vector<std::size_t> GetMallocReport();
+
     StormSocketBackendAcceptorId InitAcceptor(StormSocketFrontend * frontend, const StormSocketListenData & init_data);
     void DestroyAcceptor(StormSocketBackendAcceptorId id);
 

@@ -46,6 +46,7 @@ namespace StormSockets
     m_MemoryBlockSize = memory_block_size;
     m_BlockSize = block_size;
     m_UseVirtual = use_virtual;
+    m_OustandingMallocs = 0;
   }
 
   StormFixedBlockAllocator::~StormFixedBlockAllocator()
@@ -93,6 +94,7 @@ namespace StormSockets
           throw std::runtime_error("out of memory");
         }
 
+        m_OustandingMallocs++;
         handle = StormFixedBlockHandle{ -1, block_mem };
         return block_mem;
       }
@@ -155,6 +157,8 @@ namespace StormSockets
 #else
       free(handle.m_MallocBlock);
 #endif
+
+      m_OustandingMallocs--;
       return block_next;
     }
 

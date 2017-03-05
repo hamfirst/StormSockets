@@ -128,6 +128,16 @@ namespace StormSockets
     }
   }
 
+  std::vector<std::size_t> StormSocketBackend::GetMallocReport()
+  {
+    std::vector<std::size_t> vec;
+    vec.push_back(m_Allocator.GetOutstandingMallocs());
+    vec.push_back(m_MessageSenders.GetOutstandingMallocs());
+    vec.push_back(m_MessageReaders.GetOutstandingMallocs());
+    vec.push_back(m_PendingSendBlocks.GetOutstandingMallocs());
+    return vec;
+  }
+
   StormSocketBackendAcceptorId StormSocketBackend::InitAcceptor(StormSocketFrontend * frontend, const StormSocketListenData & init_data)
   {
     std::unique_lock<std::mutex> guard(m_AcceptorLock);
