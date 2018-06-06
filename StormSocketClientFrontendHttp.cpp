@@ -2,19 +2,28 @@
 #include "StormSocketClientFrontendHttp.h"
 #include "StormSocketConnectionHttp.h"
 
+void Log(const char * fmt, ...);
+
 namespace StormSockets
 {
   StormSocketClientFrontendHttp::StormSocketClientFrontendHttp(const StormSocketClientFrontendHttpSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendHttpBase(settings, backend),
-    m_ConnectionAllocator(sizeof(StormSocketClientConnectionHttp) * settings.MaxConnections, sizeof(StormSocketClientConnectionHttp), false)
+    m_ConnectionAllocator(sizeof(StormSocketClientConnectionHttp) * settings.MaxConnections, sizeof(StormSocketClientConnectionHttp), false),
+    m_SSLData(std::make_unique<StormSocketClientSSLData[]>(kDefaultSSLConfigs))
   {
-    InitClientSSL(m_SSLData);
+    for (int index = 0; index < kDefaultSSLConfigs; ++index)
+    {
+      InitClientSSL(m_SSLData[index], backend);
+    }
   }
 
   StormSocketClientFrontendHttp::~StormSocketClientFrontendHttp()
   {
     CleanupAllConnections();
-    ReleaseClientSSL(m_SSLData);
+    for (int index = 0; index < kDefaultSSLConfigs; ++index)
+    {
+      ReleaseClientSSL(m_SSLData[index]);
+    }
   }
 
   StormSocketConnectionId StormSocketClientFrontendHttp::RequestConnect(const char * ip_addr, int port, const StormSocketClientFrontendHttpRequestData & request_data)
@@ -24,10 +33,38 @@ namespace StormSockets
 
   StormSocketConnectionId StormSocketClientFrontendHttp::RequestConnect(const StormURI & uri, const void * body, int body_len, const void * headers, int header_len)
   {
-    auto writer = m_Backend->CreateHttpRequestWriter(body_len != 0 ? "POST" : "GET", uri.m_Uri.c_str(), uri.m_Host.c_str());
+    auto writer = m_Backend->CreateHttpRequestWriter(body_len != 0 ? "POST" : "GET", uri.m_Uri.c_str(), 
+      uri.m_Port.size() == 0 ? uri.m_Host.c_str() : (uri.m_Host + ":" + uri.m_Port).data());
     StormSocketClientFrontendHttpRequestData request_data{ writer, (uri.m_Protocol == "https") };
-    request_data.m_RequestWriter.WriteBody(body, body_len);
     request_data.m_RequestWriter.WriteHeaders(headers, header_len);
+    request_data.m_RequestWriter.WriteBody(body, body_len);
+    request_data.m_RequestWriter.FinalizeHeaders();
+
+    auto port = atoi(uri.m_Port.c_str());
+    if (port == 0)
+    {
+      if (uri.m_Protocol == "http")
+      {
+        port = 80;
+      }
+      else if (uri.m_Protocol == "https")
+      {
+        port = 443;
+      }
+    }
+
+    auto connection_id = m_Backend->RequestConnect(this, uri.m_Host.c_str(), port, &request_data);
+    m_Backend->FreeOutgoingHttpRequest(request_data.m_RequestWriter);
+
+    return connection_id;
+  }
+
+  StormSocketConnectionId StormSocketClientFrontendHttp::RequestConnect(const StormURI & uri, const char * method, const void * body, int body_len, const void * headers, int header_len)
+  {
+    auto writer = m_Backend->CreateHttpRequestWriter(method, uri.m_Uri.c_str(), uri.m_Host.c_str());
+    StormSocketClientFrontendHttpRequestData request_data{ writer, (uri.m_Protocol == "https") };
+    request_data.m_RequestWriter.WriteHeaders(headers, header_len);
+    request_data.m_RequestWriter.WriteBody(body, body_len);
     request_data.m_RequestWriter.FinalizeHeaders();
 
     auto port = atoi(uri.m_Port.c_str());
@@ -65,12 +102,24 @@ namespace StormSockets
     reader.FreeChain();
     m_Backend->DiscardReaderData(reader.m_ConnectionId, reader.m_FullDataLen);
   }
+  
+  void StormSocketClientFrontendHttp::MemoryAudit()
+  {
+    StormSocketFrontendBase::MemoryAudit();
+    printf("Connection allocator: %d\n", m_ConnectionAllocator.GetOutstandingMallocs());
+  }
 
 #ifndef DISABLE_MBED
   bool StormSocketClientFrontendHttp::UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
   {
     auto & http_connection = GetHttpConnection(frontend_id);
     return http_connection.m_UseSSL;
+  }
+
+  mbedtls_ssl_config * StormSocketClientFrontendHttp::GetSSLConfig(StormSocketFrontendConnectionId frontend_id)
+  {
+    std::size_t slot = frontend_id.m_Index >= 0 ? frontend_id.m_Index : reinterpret_cast<std::size_t>(frontend_id.m_MallocBlock);
+    return &m_SSLData[slot % kDefaultSSLConfigs].m_SSLConfig;
   }
 #endif
 
@@ -118,24 +167,34 @@ namespace StormSockets
     auto & connection = GetConnection(connection_id);
     auto & http_connection = GetHttpConnection(frontend_id);
 
-    if (http_connection.m_BodyReader)
-    {
-      if (http_connection.m_CompleteResponse == false && http_connection.m_BodyLength < 0)
-      {
-        void * parse_block = m_Allocator.ResolveHandle(connection.m_ParseBlock);
-        http_connection.m_BodyReader =
-          StormHttpResponseReader(parse_block, connection.m_UnparsedDataLength, connection.m_ParseOffset, connection_id, &m_Allocator, &m_MessageReaders,
-            *http_connection.m_StatusLine, *http_connection.m_ResponsePhrase, *http_connection.m_Headers);
-
-        CompleteBody(connection_id, http_connection);
-      }
-    }
-
     if (http_connection.m_RequestWriter)
     {
       m_Backend->FreeOutgoingHttpRequest(*http_connection.m_RequestWriter);
       http_connection.m_RequestWriter = {};
     }
+  }
+
+  void StormSocketClientFrontendHttp::QueueDisconnectEvent(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  {
+    auto & connection = GetConnection(connection_id);
+    auto & http_connection = GetHttpConnection(frontend_id);
+
+    if (http_connection.m_CompleteResponse == false && http_connection.m_BodyLength < 0 && http_connection.m_State == StormSocketClientConnectionHttpState::ReadingBody)
+    {
+      void * parse_block = m_Allocator.ResolveHandle(connection.m_ParseBlock);
+      http_connection.m_BodyReader =
+        StormHttpResponseReader(parse_block, connection.m_UnparsedDataLength, connection.m_ParseOffset, connection_id, &m_Allocator, &m_MessageReaders,
+          *http_connection.m_StatusLine, *http_connection.m_ResponsePhrase, *http_connection.m_Headers);
+
+      CompleteBody(connection_id, http_connection);
+    }
+
+    if (http_connection.m_CompleteResponse == false) 
+    {
+      Log("Disconnected after getting %d bytes\n", http_connection.m_TotalLength);
+    }
+
+    StormSocketFrontendHttpBase::QueueDisconnectEvent(connection_id, frontend_id);
   }
 
   bool StormSocketClientFrontendHttp::ProcessData(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
@@ -184,6 +243,7 @@ namespace StormSockets
 
             if (ParseStatusLine(cur_header, http_connection) == false)
             {
+              Log("Got invalid status line\n");
               ForceDisconnect(connection_id);
               return true;
             }
@@ -208,6 +268,7 @@ namespace StormSockets
             {
               if (cur_header.ReadNumber(http_connection.m_BodyLength) == false)
               {
+                Log("Got invalid content length\n");
                 ForceDisconnect(connection_id);
                 return true;
               }
@@ -232,8 +293,19 @@ namespace StormSockets
                   return false;
                 }
               }
-              else
+              else 
               {
+                if (http_connection.m_BodyLength < 0)
+                {
+                  if ((http_connection.m_ResponseCode >= 100 && http_connection.m_ResponseCode <= 199) || http_connection.m_ResponseCode == 204 || http_connection.m_ResponseCode == 304)
+                  {
+                    if (CompleteBody(connection_id, http_connection) == false)
+                    {
+                      return false;
+                    }
+                  }
+                }
+
                 http_connection.m_State = StormSocketClientConnectionHttpState::ReadingBody;
               }
             }
@@ -262,7 +334,10 @@ namespace StormSockets
 
     if (m_HeaderValues.Match(status_line, header_val, StormHttpHeaderType::HttpVer) == false)
     {
-      return false;
+      if (m_HeaderValues.Match(status_line, header_val, StormHttpHeaderType::HttpVer1) == false)
+      {
+        return false;
+      }
     }
 
     if (status_line.ReadByte() != ' ')

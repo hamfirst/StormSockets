@@ -10,6 +10,7 @@ namespace StormSockets
     std::vector<std::string> strs;
 
     strs.push_back("HTTP/1.1");
+    strs.push_back("HTTP/1.0");
     strs.push_back("content-length: ");
     strs.push_back("transfer-encoding: chunked");
 

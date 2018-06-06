@@ -20,6 +20,7 @@ namespace StormSockets
     friend class StormHttpBodyReader;
 
   public:
+    StormMessageReaderCursor() = default;
     StormMessageReaderCursor(StormFixedBlockAllocator * allocator, void * cur_block, int data_length, int read_offset);
     StormMessageReaderCursor(const StormMessageReaderCursor & rhs, int length);
     StormMessageReaderCursor(const StormMessageReaderCursor & rhs) = default;

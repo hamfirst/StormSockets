@@ -11,6 +11,8 @@
 
 #include <thread>
 #include <unordered_set>
+#include <memory>
+#include <vector>
 
 namespace StormSockets
 {
@@ -77,6 +79,7 @@ namespace StormSockets
 		void FinalizeConnection(StormSocketConnectionId id);
 		void ForceDisconnect(StormSocketConnectionId id);
 
+    void MemoryAudit();
 	protected:
 
     void AssociateConnectionId(StormSocketConnectionId connection_id);
@@ -86,7 +89,7 @@ namespace StormSockets
     bool InitServerSSL(const StormSocketServerSSLSettings & ssl_settings, StormSocketServerSSLData & ssl_data);
     void ReleaseServerSSL(StormSocketServerSSLData & ssl_data);
 
-    void InitClientSSL(StormSocketClientSSLData & ssl_data);
+    void InitClientSSL(StormSocketClientSSLData & ssl_data, StormSocketBackend * backend);
     void ReleaseClientSSL(StormSocketClientSSLData & ssl_data);
 
 

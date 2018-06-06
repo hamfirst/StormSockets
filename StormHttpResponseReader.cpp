@@ -29,6 +29,11 @@ namespace StormSockets
     packet_info->m_CurBlock = block;
     packet_info->m_DataLength = data_len;
     packet_info->m_ReadOffset = read_offset;
+
+    if (read_offset >= block_allocator->GetBlockSize())
+    {
+      throw std::runtime_error("bad read offset");
+    }
   }
 
   StormHttpBodyReader StormHttpResponseReader::GetBodyReader()

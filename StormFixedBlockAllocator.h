@@ -2,6 +2,8 @@
 
 #include "StormGenIndex.h"
 
+#include <atomic>
+
 namespace StormSockets
 {
   namespace StormFixedBlockType
@@ -48,7 +50,7 @@ namespace StormSockets
     unsigned int m_NumBlocks;
     unsigned int m_BlockSize;
     unsigned int m_MemoryBlockSize;
-    unsigned int m_OustandingMallocs;
+    std::atomic_int m_OutstandingMallocs;
     bool m_UseVirtual;
 
   public:
@@ -57,7 +59,7 @@ namespace StormSockets
     ~StormFixedBlockAllocator();
 
     int GetBlockSize() { return m_BlockSize; }
-    int GetOutstandingMallocs() { return m_OustandingMallocs; }
+    int GetOutstandingMallocs() { return m_OutstandingMallocs; }
 
   private:
     void * AllocateBlockInternal(StormFixedBlockType::Index type, StormFixedBlockHandle & handle);

@@ -8,9 +8,14 @@ namespace StormSockets
   StormSocketServerFrontendHttp::StormSocketServerFrontendHttp(const StormSocketServerFrontendHttpSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendHttpBase(settings, backend),
     m_HeaderValues(),
-    m_ConnectionAllocator(sizeof(StormSocketServerConnectionHttp) * settings.MaxConnections, sizeof(StormSocketServerConnectionHttp), false)
+    m_ConnectionAllocator(sizeof(StormSocketServerConnectionHttp) * settings.MaxConnections, sizeof(StormSocketServerConnectionHttp), false),
+    m_SSLData(std::make_unique<StormSocketServerSSLData[]>(kDefaultSSLConfigs))
   {
-    m_UseSSL = InitServerSSL(settings.SSLSettings, m_SSLData);
+    for (int index = 0; index < kDefaultSSLConfigs; ++index)
+    {
+      m_UseSSL = InitServerSSL(settings.SSLSettings, m_SSLData[index]);
+    }
+
     m_AcceptorId = m_Backend->InitAcceptor(this, settings.ListenSettings);
   }
 
@@ -21,9 +26,20 @@ namespace StormSockets
 
     if (m_UseSSL)
     {
-      ReleaseServerSSL(m_SSLData);
+      for (int index = 0; index < kDefaultSSLConfigs; ++index)
+      {
+        ReleaseServerSSL(m_SSLData[index]);
+      }
     }
   }
+
+#ifndef DISABLE_MBED
+  mbedtls_ssl_config * StormSocketServerFrontendHttp::GetSSLConfig(StormSocketFrontendConnectionId frontend_id)
+  {
+    std::size_t slot = frontend_id.m_Index >= 0 ? frontend_id.m_Index : reinterpret_cast<std::size_t>(frontend_id.m_MallocBlock);
+    return &m_SSLData[slot % kDefaultSSLConfigs].m_SSLConfig;
+  }
+#endif
 
   StormHttpResponseWriter StormSocketServerFrontendHttp::CreateOutgoingResponse(int response_code, const char * response_phrase)
   {
@@ -256,8 +272,6 @@ namespace StormSockets
       {
         break;
       }
-
-      putc(c, stdout);
 
       uri_len++;
       request_line.Advance(1);

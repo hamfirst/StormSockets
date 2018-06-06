@@ -4,25 +4,7 @@
 #include <fstream>
 #include <stdexcept>
 
-#ifndef DISABLE_MBED
-
-#ifdef _WINDOWS
-#include <sspi.h>
-#include <schnlsp.h>
-#include <ntsecapi.h>
-
-#pragma comment(lib, "Crypt32.lib")
-#pragma comment(lib, "Secur32.lib")
-#endif
-
 #define MBED_CHECK_ERROR if(error < 0) throw std::runtime_error("Certificate load error " + std::to_string(error));
-#endif
-
-#ifdef _LINUX
-#include <cstdio>
-
-#include <dirent.h>
-#endif
 
 namespace StormSockets
 {
@@ -80,17 +62,22 @@ namespace StormSockets
       m_Backend->SetDisconnectFlag(id, StormSocketDisconnectFlags::kRemoteClose);
     }
   }
+  
+  void StormSocketFrontendBase::MemoryAudit()
+  {
+    printf("Owned connections: %d\n", (int)m_OwnedConnections.size());
+  }
 
   void StormSocketFrontendBase::AssociateConnectionId(StormSocketConnectionId connection_id)
   {
     if (m_OwnedConnectionLock.owns_lock())
     {
-      m_OwnedConnections.insert(connection_id);
+      m_OwnedConnections.emplace(connection_id);
     }
     else
     {
       std::lock_guard<std::mutex> guard(m_OwnedConnectionMutex);
-      m_OwnedConnections.insert(connection_id);
+      m_OwnedConnections.emplace(connection_id);
     }
   }
 
@@ -134,7 +121,7 @@ namespace StormSockets
 
   bool StormSocketFrontendBase::InitServerSSL(const StormSocketServerSSLSettings & ssl_settings, StormSocketServerSSLData & ssl_data)
   {
-    if (ssl_settings.CertificateFile && ssl_settings.PrivateKeyFile != nullptr)
+    if (ssl_settings.CertificateFile != nullptr && ssl_settings.PrivateKeyFile != nullptr)
     {
       std::ifstream cert_file;
       cert_file.open(ssl_settings.CertificateFile, std::ifstream::in | std::ifstream::binary);
@@ -216,7 +203,7 @@ namespace StormSockets
 #endif
   }
 
-  void StormSocketFrontendBase::InitClientSSL(StormSocketClientSSLData & ssl_data)
+  void StormSocketFrontendBase::InitClientSSL(StormSocketClientSSLData & ssl_data, StormSocketBackend * backend)
   {
 #ifndef DISABLE_MBED
     mbedtls_entropy_init(&ssl_data.m_Entropy);
@@ -242,68 +229,17 @@ namespace StormSockets
     };
 
     mbedtls_x509_crt_init(&ssl_data.m_CA);
-#ifdef _WINDOWS
 
-    auto cert_store = CertOpenSystemStore(NULL, L"ROOT");
-    PCCERT_CONTEXT cert_context = nullptr;
-
-    while ((cert_context = CertEnumCertificatesInStore(cert_store, cert_context)) != nullptr)
+    auto & certs = backend->GetCertificates();
+    for (auto & cert : certs)
     {
-      if ((cert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0)
-      {
-        mbedtls_x509_crt_parse(&ssl_data.m_CA, cert_context->pbCertEncoded, cert_context->cbCertEncoded);
-      }
+      mbedtls_x509_crt_parse(&ssl_data.m_CA, cert.m_Data.get(), cert.m_Length);
     }
-
-    CertCloseStore(cert_store, 0);
-#endif
-
-#ifdef _LINUX
-    auto dir = opendir("/etc/ssl/certs");
-    if (dir != nullptr)
-    {
-      while(true)
-      {
-        auto ent = readdir(dir);
-        if (ent == nullptr)
-        {
-          closedir(dir);
-          break;
-        }
-
-        if (ent->d_type == DT_LNK || ent->d_type == DT_REG || ent->d_type == DT_UNKNOWN)
-        {
-          if (strstr(ent->d_name, ".crt"))
-          {
-            std::string crt_filename = std::string("/etc/ssl/certs/") + ent->d_name;
-
-            auto fp = fopen(crt_filename.c_str(), "rb");
-            if (fp == nullptr)
-            {
-              continue;
-            }
-
-            fseek(fp, 0, SEEK_END);
-            auto len = ftell(fp);
-            fseek(fp, 0, SEEK_SET);
-
-            auto buffer = std::make_unique<uint8_t[]>(len + 1);
-            fread(buffer.get(), 1, len, fp);
-            fclose(fp);
-
-            buffer[len] = 0;
-
-            mbedtls_x509_crt_parse(&ssl_data.m_CA, buffer.get(), len + 1);
-          }
-        }
-      }
-    }
-#endif
 
     mbedtls_ssl_conf_ca_chain(&ssl_data.m_SSLConfig, &ssl_data.m_CA, nullptr);
 
     mbedtls_ssl_conf_dbg(&ssl_data.m_SSLConfig, debug_func, stdout);
-    mbedtls_ssl_conf_authmode(&ssl_data.m_SSLConfig, MBEDTLS_SSL_VERIFY_REQUIRED);
+    mbedtls_ssl_conf_authmode(&ssl_data.m_SSLConfig, MBEDTLS_SSL_VERIFY_NONE);
 #endif
   }
 

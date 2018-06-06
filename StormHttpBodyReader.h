@@ -21,8 +21,12 @@ namespace StormSockets
     void Advance();
 
   public:
+    StormHttpBodyReader() = default;
     StormHttpBodyReader(const StormHttpBodyReader & rhs) = default;
     StormHttpBodyReader(StormHttpBodyReader && rhs) = default;
+
+    StormHttpBodyReader & operator = (const StormHttpBodyReader & rhs) = default;
+    StormHttpBodyReader & operator = (StormHttpBodyReader && rhs) = default;
 
     uint8_t ReadByte();
     wchar_t ReadUTF8Char();

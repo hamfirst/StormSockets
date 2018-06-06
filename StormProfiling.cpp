@@ -6,11 +6,45 @@
 #include <Windows.h>
 #endif
 
+#include <inttypes.h>
+#include <math.h>
 #include <stdio.h>
+#include <time.h>
+#include <stdarg.h>
 
 
 namespace StormSockets
 {
+	void StormProfilePrint(const char * fmt, ...)
+	{
+		return;
+		
+		char buffer[1024];
+		va_list args;
+		va_start(args, fmt);
+		vsnprintf(buffer, sizeof(buffer), fmt, args);
+		va_end(args);
+
+
+#ifdef _WINDOWS
+		long ms = GetTickCount();
+#else
+
+		long ms;
+		struct timespec now;
+		if (clock_gettime(CLOCK_MONOTONIC, &now))
+		{
+			ms = 0;
+		}
+		else
+		{
+			ms = now.tv_sec * 1000.0 + now.tv_nsec / 1000000.0;
+		}
+#endif
+
+		printf("%lu: %s", ms, buffer);
+	}
+
 	std::atomic_uint_fast64_t s_Timers[ProfilerCategory::kCount];
 
 	uint64_t Profiling::StartProfiler()

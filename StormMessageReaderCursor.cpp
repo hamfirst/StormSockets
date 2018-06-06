@@ -15,7 +15,10 @@ namespace StormSockets
     m_ReadOffset(read_offset),
     m_FixedBlockSize(allocator->GetBlockSize())
   {
-
+    if (read_offset >= m_FixedBlockSize)
+    {
+      throw std::runtime_error("bad read offset");
+    }
   }
 
   StormMessageReaderCursor::StormMessageReaderCursor(const StormMessageReaderCursor & rhs, int length)
@@ -166,6 +169,7 @@ namespace StormSockets
     }
 
     memcpy(buffer, Marshal::MemOffset(m_CurBlock, m_ReadOffset), length);
+    m_ReadOffset += length;
   }
 
   void StormMessageReaderCursor::SkipWhiteSpace()
@@ -263,10 +267,6 @@ namespace StormSockets
       if (required_digits > 0)
       {
         required_digits--;
-        if (required_digits < 0)
-        {
-          return false;
-        }
       }
 
       value *= 16;

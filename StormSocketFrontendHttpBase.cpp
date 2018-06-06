@@ -1,6 +1,8 @@
 
 #include "StormSocketFrontendHttpBase.h"
 
+void Log(const char * fmt, ...);
+
 namespace StormSockets
 {
   StormSocketFrontendHttpBase::StormSocketFrontendHttpBase(const StormSocketFrontendHttpSettings & settings, StormSocketBackend * backend) :
@@ -26,6 +28,7 @@ namespace StormSockets
         {
           if (cur_header.ReadHexNumber(http_connection.m_ChunkSize) == false)
           {
+            Log("Got invalid chunk size\n");
             ForceDisconnect(connection_id);
             return true;
           }

@@ -17,7 +17,7 @@ namespace StormSockets
 
 #ifndef DISABLE_MBED
     virtual bool UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) = 0;
-    virtual mbedtls_ssl_config * GetSSLConfig() = 0;
+    virtual mbedtls_ssl_config * GetSSLConfig(StormSocketFrontendConnectionId frontend_id) = 0;
 #endif
 
     virtual StormSocketFrontendConnectionId AllocateFrontendId() = 0;

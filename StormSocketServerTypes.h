@@ -49,6 +49,8 @@ namespace StormSockets
     uint8_t ReaderBuffer[std::max(std::max(sizeof(StormWebsocketMessageReader), sizeof(StormHttpResponseReader)), sizeof(StormHttpRequestReader))];
   };
 
+  static const int kDefaultSSLConfigs = 128;
+
   struct StormSocketInitSettings
   {
     int NumIOThreads = std::thread::hardware_concurrency();

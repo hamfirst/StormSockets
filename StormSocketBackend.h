@@ -31,6 +31,12 @@ namespace StormSockets
 
   struct StormPendingSendBlock;
 
+  struct Certificate
+  {
+    std::unique_ptr<uint8_t[]> m_Data;
+    std::size_t m_Length;
+  };
+
   class StormSocketBackend
   {
     StormFixedBlockAllocator m_Allocator;
@@ -90,12 +96,16 @@ namespace StormSockets
     std::map<StormSocketBackendAcceptorId, AcceptorData> m_Acceptors;
     StormSocketBackendAcceptorId m_NextAcceptorId;
 
+    std::vector<Certificate> m_Certificates;
+
   public:
 
     StormSocketBackend(const StormSocketInitSettings & settings);
     virtual ~StormSocketBackend();
 
     std::vector<std::size_t> GetMallocReport();
+    void MemoryAudit();
+    std::vector<Certificate> & GetCertificates();
 
     StormSocketBackendAcceptorId InitAcceptor(StormSocketFrontend * frontend, const StormSocketListenData & init_data);
     void DestroyAcceptor(StormSocketBackendAcceptorId id);
@@ -155,13 +165,13 @@ namespace StormSockets
     void AcceptNewConnection(const asio::error_code& error, StormSocketBackendAcceptorId acceptor_id);
 
     void PrepareToConnect(StormSocketConnectionId id, asio::ip::tcp::endpoint endpoint);
-    void FinalizeSteamValidation(StormSocketConnectionId id);
+    void FinalizeConnectToHost(StormSocketConnectionId id);
     void ConnectFailed(StormSocketConnectionId id);
 
     void ProcessNewData(StormSocketConnectionId connection_id, const asio::error_code & error, std::size_t bytes_received);
-    bool ProcessReceivedData(StormSocketConnectionId connection_id);
+    bool ProcessReceivedData(StormSocketConnectionId connection_id, bool recv_failure);
     void PrepareToRecv(StormSocketConnectionId connection_id);
-    void TryProcessReceivedData(StormSocketConnectionId connection_id);
+    void TryProcessReceivedData(StormSocketConnectionId connection_id, bool recv_failure);
 
     void IOThreadMain();
     void TransmitConnectionPackets(StormSocketConnectionId connection_id);

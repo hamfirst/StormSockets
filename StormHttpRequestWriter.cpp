@@ -10,6 +10,7 @@ namespace StormSockets
 
   static const char * http_ver = "HTTP/1.1";
   static const char * host_header = "Host: ";
+  static const char * user_agent = "Connection: close\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nAccept: */*\r\n";
   static const char * content_len = "Content-Length: ";
 
   StormHttpRequestWriter::StormHttpRequestWriter(const char * method, const char * uri, const char * host, StormMessageWriter & header_writer, StormMessageWriter & body_writer)
@@ -26,6 +27,7 @@ namespace StormSockets
     m_HeaderWriter.WriteString(host_header);
     m_HeaderWriter.WriteString(host);
     m_HeaderWriter.WriteInt16(line_ending);
+    m_HeaderWriter.WriteString(user_agent);
   }
 
   void StormHttpRequestWriter::WriteHeader(const char * str)

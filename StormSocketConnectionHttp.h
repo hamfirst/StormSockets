@@ -25,6 +25,7 @@ namespace StormSockets
     int m_TotalLength = 0;
     int m_BodyLength = -1;
     int m_ChunkSize = 0;
+    int m_RecievedLength = 0;
 
     std::experimental::optional<StormMessageHeaderReader> m_Headers;
   };

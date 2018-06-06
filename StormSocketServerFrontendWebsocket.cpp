@@ -8,11 +8,16 @@ namespace StormSockets
     StormSocketFrontendWebsocketBase(settings, backend),
     m_ConnectionAllocator(sizeof(StormSocketServerConnectionWebSocket) * settings.MaxConnections, sizeof(StormSocketServerConnectionWebSocket), false),
     m_HeaderValues(settings.Protocol),
-    m_MaxHeaderSize(settings.MaxHeaderSize)
+    m_MaxHeaderSize(settings.MaxHeaderSize),
+    m_SSLData(std::make_unique<StormSocketServerSSLData[]>(kDefaultSSLConfigs))
   {
+    for (int index = 0; index < kDefaultSSLConfigs; ++index)
+    {
+      m_UseSSL = InitServerSSL(settings.SSLSettings, m_SSLData[index]);
+    }
+
     m_HasProtocol = settings.Protocol != NULL;
 
-    m_UseSSL = InitServerSSL(settings.SSLSettings, m_SSLData);
     m_AcceptorId = m_Backend->InitAcceptor(this, settings.ListenSettings);
     m_Port = settings.ListenSettings.Port;
   }
@@ -24,9 +29,20 @@ namespace StormSockets
 
     if (m_UseSSL)
     {
-      ReleaseServerSSL(m_SSLData);
+      for (int index = 0; index < kDefaultSSLConfigs; ++index)
+      {
+        ReleaseServerSSL(m_SSLData[index]);
+      }
     }
   }
+
+#ifndef DISABLE_MBED
+  mbedtls_ssl_config * StormSocketServerFrontendWebsocket::GetSSLConfig(StormSocketFrontendConnectionId frontend_id)
+  {
+    std::size_t slot = frontend_id.m_Index >= 0 ? frontend_id.m_Index : reinterpret_cast<std::size_t>(frontend_id.m_MallocBlock);
+    return &m_SSLData[slot % kDefaultSSLConfigs].m_SSLConfig;
+  }
+#endif
 
   StormSocketServerConnectionWebSocket & StormSocketServerFrontendWebsocket::GetWSConnection(StormSocketFrontendConnectionId id)
   {
@@ -174,7 +190,6 @@ namespace StormSockets
               ws_connection.m_GotConnectionUpgradeHeader &&
               ws_connection.m_GotWebsocketVerHeader &&
               ws_connection.m_GotWebsocketKeyHeader &&
-              ws_connection.m_GotHeaderTerminator &&
               (m_HasProtocol == false || ws_connection.m_GotWebsocketProtoHeader))
             {
               m_HeaderValues.WriteHeader(ws_connection.m_PendingWriter, StormWebsocketHeaderType::ResponseTerminator);

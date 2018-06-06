@@ -3,6 +3,8 @@
 
 #include "StormGenIndex.h"
 
+#include <functional>
+
 namespace StormSockets
 {
 	struct StormSocketConnectionId
@@ -11,6 +13,12 @@ namespace StormSockets
 
 		StormSocketConnectionId();
 		StormSocketConnectionId(int index, int gen);
+
+    StormSocketConnectionId(const StormSocketConnectionId & rhs) = default;
+    StormSocketConnectionId(StormSocketConnectionId && rhs) = default;
+
+    StormSocketConnectionId & operator =(const StormSocketConnectionId & rhs) = default;
+    StormSocketConnectionId & operator =(StormSocketConnectionId && rhs) = default;
 
 		operator int() const;
 
@@ -31,7 +39,7 @@ namespace std
   {
     int operator()(StormSockets::StormSocketConnectionId const & id) const
     {
-      return (int)id;
+      return (int)id.m_Index.Raw;
     }
   };   
 }

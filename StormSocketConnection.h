@@ -66,6 +66,7 @@ namespace StormSockets
     int m_DisconnectFlags = 0;
     std::atomic_int m_PendingPackets;
     volatile int m_SlotGen = 0;
+    int m_SlotIndex = 0;
     std::atomic_int m_RecvCriticalSection;
 
     StormFixedBlockHandle m_PendingSendBlockStart;
@@ -84,8 +85,8 @@ namespace StormSockets
     std::mutex m_TimeoutLock;
     std::atomic_bool m_HandshakeComplete;
 
+    volatile bool m_Allocated = false;
     volatile bool m_FailedConnection = false;
     volatile bool m_Closing = false;
-    volatile bool m_RecvFailure = false;
   };
 }

@@ -6,6 +6,9 @@
 
 namespace StormSockets
 {
+
+	void StormProfilePrint(const char * fmt, ...);
+
 	namespace ProfilerCategory
 	{
 		enum Index

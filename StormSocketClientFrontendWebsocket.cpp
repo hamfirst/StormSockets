@@ -6,20 +6,29 @@
 
 #include <hash/Hash.h>
 
+void Log(const char * fmt, ...);
+
 namespace StormSockets
 {
   StormSocketClientFrontendWebsocket::StormSocketClientFrontendWebsocket(const StormSocketClientFrontendWebsocketSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendWebsocketBase(settings, backend),
     m_HeaderValues(nullptr),
-    m_ConnectionAllocator(sizeof(StormSocketClientConnectionWebsocket) * settings.MaxConnections, sizeof(StormSocketClientConnectionWebsocket), false)
+    m_ConnectionAllocator(sizeof(StormSocketClientConnectionWebsocket) * settings.MaxConnections, sizeof(StormSocketClientConnectionWebsocket), false),
+    m_SSLData(std::make_unique<StormSocketClientSSLData[]>(kDefaultSSLConfigs))
   {
-    InitClientSSL(m_SSLData);
+    for (int index = 0; index < kDefaultSSLConfigs; ++index)
+    {
+      InitClientSSL(m_SSLData[index], backend);
+    }
   }
 
   StormSocketClientFrontendWebsocket::~StormSocketClientFrontendWebsocket()
   {
     CleanupAllConnections();
-    ReleaseClientSSL(m_SSLData);
+    for (int index = 0; index < kDefaultSSLConfigs; ++index)
+    {
+      ReleaseClientSSL(m_SSLData[index]);
+    }
   }
 
   StormSocketConnectionId StormSocketClientFrontendWebsocket::RequestConnect(const char * ip_addr, int port,
@@ -34,6 +43,13 @@ namespace StormSockets
     auto & ws_connection = GetWSConnection(frontend_id);
     return ws_connection.m_UseSSL;
   }
+
+  mbedtls_ssl_config * StormSocketClientFrontendWebsocket::GetSSLConfig(StormSocketFrontendConnectionId frontend_id)
+  {
+    std::size_t slot = frontend_id.m_Index >= 0 ? frontend_id.m_Index : reinterpret_cast<std::size_t>(frontend_id.m_MallocBlock);
+    return &m_SSLData[slot % kDefaultSSLConfigs].m_SSLConfig;
+  }
+
 #endif
 
   StormSocketClientConnectionWebsocket & StormSocketClientFrontendWebsocket::GetWSConnection(StormSocketFrontendConnectionId id)
@@ -189,7 +205,6 @@ namespace StormSockets
                   }
 
                   test_hash = crc32additive(test_hash, c);
-                  break;
                 }
 
                 test_hash = crc32end(test_hash);
@@ -241,7 +256,6 @@ namespace StormSockets
               ws_connection.m_GotWebsocketHeader &&
               ws_connection.m_GotConnectionUpgradeHeader &&
               ws_connection.m_GotWebsocketKeyHeader &&
-              ws_connection.m_GotHeaderTerminator &&
               (ws_connection.m_Protocol.size() == 0 || ws_connection.m_GotWebsocketProtoHeader))
             {
               ws_connection.m_State = StormSocketServerConnectionWebsocketState::ReadHeaderAndApplyMask;
@@ -321,7 +335,7 @@ namespace StormSockets
 
     writer.WriteByteBlock("GET ", 0, 4);
     writer.WriteByteBlock(ws_connection.m_Uri.c_str(), 0, ws_connection.m_Uri.size());
-    writer.WriteByteBlock(" HTTP/1.1\r\nHost: ", 0, 16);
+    writer.WriteByteBlock(" HTTP/1.1\r\nHost: ", 0, 20);
     writer.WriteByteBlock(ws_connection.m_Host.c_str(), 0, ws_connection.m_Host.size());
 
     if (ws_connection.m_Origin.size() > 0)

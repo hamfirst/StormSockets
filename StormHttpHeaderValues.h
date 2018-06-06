@@ -9,6 +9,7 @@ namespace StormSockets
     enum Index
     {
       HttpVer,
+      HttpVer1,
       ContentLength,
       ChunkedEncoding,
       Count,

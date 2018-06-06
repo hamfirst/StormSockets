@@ -13,7 +13,7 @@ namespace StormSockets
   {
   protected:
     StormFixedBlockAllocator m_ConnectionAllocator;
-    StormSocketClientSSLData m_SSLData;
+    std::unique_ptr<StormSocketClientSSLData[]> m_SSLData;
 
     StormWebsocketHeaderValues m_HeaderValues;
 
@@ -26,7 +26,7 @@ namespace StormSockets
 
 #ifndef DISABLE_MBED
     bool UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
-    mbedtls_ssl_config * GetSSLConfig() { return &m_SSLData.m_SSLConfig; }
+    mbedtls_ssl_config * GetSSLConfig(StormSocketFrontendConnectionId frontend_id);
 #endif
 
   protected:

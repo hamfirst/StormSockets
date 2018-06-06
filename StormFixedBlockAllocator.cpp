@@ -16,11 +16,11 @@ namespace StormSockets
     void * block_mem;
 
 #ifdef _WINDOWS
-    if (use_virtual)
-    {
-      block_mem = VirtualAlloc(NULL, total_size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-    }
-    else
+    //if (use_virtual)
+    //{
+    //  block_mem = VirtualAlloc(NULL, total_size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    //}
+    //else
     {
       block_mem = malloc(total_size);
     }
@@ -33,6 +33,7 @@ namespace StormSockets
     // Set up the stack - each block points to the one prior
     int num_blocks = total_size / memory_block_size;
     int * block_list = (int *)malloc(sizeof(int) * num_blocks);
+
     for (int block = 0; block < num_blocks; block++)
     {
       block_list[block] = block - 1;
@@ -46,17 +47,17 @@ namespace StormSockets
     m_MemoryBlockSize = memory_block_size;
     m_BlockSize = block_size;
     m_UseVirtual = use_virtual;
-    m_OustandingMallocs = 0;
+    m_OutstandingMallocs = 0;
   }
 
   StormFixedBlockAllocator::~StormFixedBlockAllocator()
   {
 #ifdef _WINDOWS
-    if (m_UseVirtual)
-    {
-      VirtualFree(m_BlockMem, 0, MEM_RELEASE);
-    }
-    else
+    //if (m_UseVirtual)
+    //{
+    //  VirtualFree(m_BlockMem, 0, MEM_RELEASE);
+    //}
+    //else
     {
       free(m_BlockMem);
     }
@@ -78,11 +79,11 @@ namespace StormSockets
       {
         void * block_mem;
 #ifdef _WINDOWS
-        if (m_UseVirtual)
-        {
-          block_mem = VirtualAlloc(NULL, m_MemoryBlockSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-        }
-        else
+        //if (m_UseVirtual)
+        //{
+        //  block_mem = VirtualAlloc(NULL, m_MemoryBlockSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+        //}
+        //else
         {
           block_mem = malloc(m_MemoryBlockSize);
         }
@@ -94,7 +95,7 @@ namespace StormSockets
           throw std::runtime_error("out of memory");
         }
 
-        m_OustandingMallocs++;
+        m_OutstandingMallocs++;
         handle = StormFixedBlockHandle{ -1, block_mem };
         return block_mem;
       }
@@ -146,11 +147,11 @@ namespace StormSockets
     if (handle.m_Index < 0)
     {
 #ifdef _WINDOWS
-      if (m_UseVirtual)
-      {
-        VirtualFree(handle.m_MallocBlock, 0, MEM_RELEASE);
-      }
-      else
+      //if (m_UseVirtual)
+      //{
+      //  VirtualFree(handle.m_MallocBlock, 0, MEM_RELEASE);
+      //}
+      //else
       {
         free(handle.m_MallocBlock);
       }
@@ -158,7 +159,7 @@ namespace StormSockets
       free(handle.m_MallocBlock);
 #endif
 
-      m_OustandingMallocs--;
+      m_OutstandingMallocs--;
       return block_next;
     }
 

@@ -8,12 +8,34 @@
 #include "mbedtls/debug.h"
 #endif
 
+#ifndef DISABLE_MBED
+
+#ifdef _WINDOWS
+#include <sspi.h>
+#include <schnlsp.h>
+#include <ntsecapi.h>
+
+#pragma comment(lib, "Crypt32.lib")
+#pragma comment(lib, "Secur32.lib")
+#endif
+#endif
+
+#ifdef _LINUX
+#include <cstdio>
+
+#include <dirent.h>
+#endif
+
 #ifdef _WINDOWS
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "mswsock.lib")
 #endif
 
 #include <stdexcept>
+
+std::atomic_int g_StormSocketsNumTlsConnections = {};
+
+void Log(const char * fmt, ...);
 
 namespace StormSockets
 {
@@ -92,6 +114,78 @@ namespace StormSockets
     {
       m_SendThreads[index] = std::thread(&StormSocketBackend::SendThreadMain, this, index);
     }
+
+    std::vector<Certificate> certs;
+
+#ifdef _WINDOWS
+
+    auto cert_store = CertOpenSystemStore(NULL, TEXT("ROOT"));
+    PCCERT_CONTEXT cert_context = nullptr;
+
+    while ((cert_context = CertEnumCertificatesInStore(cert_store, cert_context)) != nullptr)
+    {
+      if ((cert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0)
+      {
+        Certificate cert;
+        cert.m_Data = std::make_unique<uint8_t[]>(cert_context->cbCertEncoded + 1);
+        cert.m_Length = cert_context->cbCertEncoded + 1;
+
+        memcpy(cert.m_Data.get(), cert_context->pbCertEncoded, cert_context->cbCertEncoded);
+        cert.m_Data[cert_context->cbCertEncoded] = 0;
+
+        certs.emplace_back(std::move(cert));
+      }
+    }
+
+    CertCloseStore(cert_store, 0);
+#endif
+
+#ifdef _LINUX
+    auto dir = opendir("/etc/ssl/certs");
+    if (dir != nullptr)
+    {
+      while (true)
+      {
+        auto ent = readdir(dir);
+        if (ent == nullptr)
+        {
+          closedir(dir);
+          break;
+        }
+
+        if (ent->d_type == DT_LNK || ent->d_type == DT_REG || ent->d_type == DT_UNKNOWN)
+        {
+          if (strstr(ent->d_name, ".crt"))
+          {
+            std::string crt_filename = std::string("/etc/ssl/certs/") + ent->d_name;
+
+            auto fp = fopen(crt_filename.c_str(), "rb");
+            if (fp == nullptr)
+            {
+              continue;
+            }
+
+            fseek(fp, 0, SEEK_END);
+            auto len = ftell(fp);
+            fseek(fp, 0, SEEK_SET);
+
+            Certificate cert;
+            cert.m_Data = std::make_unique<uint8_t[]>(len + 1);
+            cert.m_Length = len + 1;
+
+            fread(cert.m_Data.get(), 1, len, fp);
+            cert.m_Data[len] = 0;
+
+            certs.emplace_back(std::move(cert));
+
+            fclose(fp);
+          }
+        }
+      }
+    }
+#endif
+
+    m_Certificates = std::move(certs);
   }
 
   StormSocketBackend::~StormSocketBackend()
@@ -123,7 +217,6 @@ namespace StormSockets
       {
         auto connection_id = StormSocketConnectionId(index, connection.m_SlotGen);
         FreeConnectionResources(connection_id);
-        connection.m_Frontend->DisassociateConnectionId(connection_id);
       }
     }
   }
@@ -136,6 +229,33 @@ namespace StormSockets
     vec.push_back(m_MessageReaders.GetOutstandingMallocs());
     vec.push_back(m_PendingSendBlocks.GetOutstandingMallocs());
     return vec;
+  }
+  
+  void StormSocketBackend::MemoryAudit()
+  {
+    auto malloc_report = GetMallocReport();
+    printf("Main allocator size: %d\n", (int)malloc_report[0]);
+    printf("Sender allocator size: %d\n", (int)malloc_report[1]);
+    printf("Reader allocator size: %d\n", (int)malloc_report[2]);
+    printf("Pending allocator size: %d\n", (int)malloc_report[3]);
+    printf("Acceptor size: %d\n", (int)m_Acceptors.size());
+
+    int num_connections = 0;
+    for(int index = 0; index < m_MaxConnections; ++index)
+    {
+      if(m_Connections[index].m_Allocated)
+      {
+        num_connections++;
+      }
+    }
+
+    printf("Allocated connections: %d\n", num_connections);
+    printf("Webrtc SSL connections: %d\n", (int)g_StormSocketsNumTlsConnections);
+  }
+
+  std::vector<Certificate> & StormSocketBackend::GetCertificates()
+  {
+    return m_Certificates;
   }
 
   StormSocketBackendAcceptorId StormSocketBackend::InitAcceptor(StormSocketFrontend * frontend, const StormSocketListenData & init_data)
@@ -180,18 +300,28 @@ namespace StormSockets
   StormSocketConnectionId StormSocketBackend::RequestConnect(StormSocketFrontend * frontend, const char * ip_addr, int port, const void * init_data)
   {
     asio::ip::tcp::socket socket(m_IOService);
+    asio::error_code ec;
+    socket.open(asio::ip::tcp::v4(), ec);
+
+    if(ec)
+    {
+      Log("Could not create new client socket\n");
+      return StormSocketConnectionId::InvalidConnectionId;
+    }
+
+    socket.set_option(asio::ip::tcp::no_delay(true), ec);
 
     auto connection_id = AllocateConnection(frontend, 0, port, true, init_data);
 
     if (connection_id == StormSocketConnectionId::InvalidConnectionId)
     {
+      Log("Could not allocate connection id\n");
+
       socket.close();
       return StormSocketConnectionId::InvalidConnectionId;
     }
 
     m_ClientSockets[connection_id].emplace(std::move(socket));
-
-    asio::error_code ec;
     auto numerical_addr = asio::ip::address_v4::from_string(ip_addr, ec);
 
     if (!ec)
@@ -212,18 +342,19 @@ namespace StormSockets
 
             if (ep.protocol() == ep.protocol().v4())
             {
-
               PrepareToConnect(connection_id, asio::ip::tcp::endpoint(ep.address(), port));
               return;
             }
 
             ++itr;
           }
-
+                
+          Log("Resolve failed\n");
           ConnectFailed(connection_id);
         }
         else
         {
+          Log("Resolve failed\n");
           ConnectFailed(connection_id);
         }
       };
@@ -364,7 +495,7 @@ namespace StormSockets
   }
 
   void StormSocketBackend::SendHttpRequestToConnection(StormHttpRequestWriter & writer, StormSocketConnectionId id)
-  {
+  {    
     SendHttpToConnection(writer.m_HeaderWriter, writer.m_BodyWriter, id);
   }
 
@@ -643,11 +774,6 @@ namespace StormSockets
       FreeOutgoingPacket(connection.m_EncryptWriter);
 #endif
 
-      // Free any pent up packets
-      connection.m_Frontend->CleanupConnection(id, connection.m_FrontendId);
-      connection.m_Frontend->FreeFrontendId(connection.m_FrontendId);
-      connection.m_Frontend->DisassociateConnectionId(id);
-
       // Free the recv buffer
       connection.m_RecvBuffer.FreeBuffers();
       connection.m_DecryptBuffer.FreeBuffers();
@@ -712,7 +838,8 @@ namespace StormSockets
         connection.m_HandshakeComplete = false;
         connection.m_FailedConnection = false;
         connection.m_Closing = false;
-        connection.m_RecvFailure = false;
+        connection.m_Allocated = true;
+        connection.m_SlotIndex = index;
 
         connection.m_RecvBuffer.InitBuffers();
 #ifndef DISABLE_MBED
@@ -733,6 +860,7 @@ namespace StormSockets
 
               if (m_Connections[index].m_SlotGen == slot_gen && m_Connections[index].m_HandshakeComplete == false)
               {
+                Log("Handshake timeout\n");
                 ForceDisconnect(connection_id);
               }
             }
@@ -764,6 +892,7 @@ namespace StormSockets
   void StormSocketBackend::FreeConnectionSlot(StormSocketConnectionId id)
   {
     auto & connection = GetConnection(id);
+    connection.m_Allocated = false;
     connection.m_Used.clear();
   }
 
@@ -777,6 +906,7 @@ namespace StormSockets
     }
 
     auto & acceptor = acceptor_itr->second;
+    acceptor.m_AcceptSocket = asio::ip::tcp::socket(m_IOService);
 
     auto accept_callback = [this, acceptor_id](const asio::error_code & error)
     {
@@ -791,6 +921,7 @@ namespace StormSockets
   {
     if (error)
     {
+      printf("Accept error: %s (%d)\n", error.message().data(), error.value());
       return;
     }
 
@@ -799,34 +930,40 @@ namespace StormSockets
     auto acceptor_itr = m_Acceptors.find(acceptor_id);
     if (acceptor_itr == m_Acceptors.end())
     {
+      printf("Acceptor not found\n");
       return;
     }
 
     auto & acceptor = acceptor_itr->second;
+    auto & new_socket = acceptor.m_AcceptSocket;
+
+    asio::error_code ec;
+    new_socket.set_option(asio::ip::tcp::no_delay(true), ec);
 
     StormSocketConnectionId connection_id = AllocateConnection(acceptor.m_Frontend,
       acceptor.m_AcceptEndpoint.address().to_v4().to_ulong(), acceptor.m_AcceptEndpoint.port(), false, nullptr);
 
     if (connection_id == StormSocketConnectionId::InvalidConnectionId)
     {
-      acceptor.m_AcceptSocket.close();
-      acceptor.m_AcceptSocket = asio::ip::tcp::socket(m_IOService);
+      printf("Ran out of connection slots\n");
+      new_socket.close();
+      new_socket = asio::ip::tcp::socket(m_IOService);
       return;
     }
 
-    m_ClientSockets[connection_id].emplace(std::move(acceptor.m_AcceptSocket));
-    m_ClientSockets[connection_id]->set_option(asio::ip::tcp::no_delay(true));
+    m_ClientSockets[connection_id].emplace(std::move(new_socket));
 
     auto & connection = GetConnection(connection_id);
 
 #ifndef DISABLE_MBED
     if (acceptor.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
     {
-
-      auto ssl_config = acceptor.m_Frontend->GetSSLConfig();
+      auto ssl_config = acceptor.m_Frontend->GetSSLConfig(connection.m_FrontendId);
 
       mbedtls_ssl_init(&connection.m_SSLContext.m_SSLContext);
       mbedtls_ssl_setup(&connection.m_SSLContext.m_SSLContext, ssl_config);
+
+      g_StormSocketsNumTlsConnections++;
 
       connection.m_DecryptBuffer.InitBuffers();
 
@@ -840,40 +977,15 @@ namespace StormSockets
       auto recv_callback = [](void * ctx, unsigned char * data, size_t size) -> int
       {
         StormSocketConnectionBase * connection = (StormSocketConnectionBase *)ctx;
-        if (connection->m_DecryptBuffer.m_DataAvail == 0)
-        {
-          return MBEDTLS_ERR_SSL_WANT_READ;
-        }
-
-        void * block_start = connection->m_DecryptBuffer.m_Allocator->ResolveHandle(connection->m_DecryptBuffer.m_BlockStart);
-        block_start = Marshal::MemOffset(block_start, connection->m_DecryptBuffer.m_ReadOffset);
-
-        int mem_avail = connection->m_DecryptBuffer.m_Allocator->GetBlockSize() - connection->m_DecryptBuffer.m_ReadOffset;
-        mem_avail = std::min(mem_avail, (int)connection->m_DecryptBuffer.m_DataAvail);
-        mem_avail = std::min(mem_avail, (int)size);
-
-        memcpy(data, block_start, mem_avail);
-        return mem_avail;
+        auto read = connection->m_DecryptBuffer.BlockRead(data, size);
+        return read == 0 ? MBEDTLS_ERR_SSL_WANT_READ : read;
       };
 
       auto recv_timeout_callback = [](void * ctx, unsigned char * data, size_t size, uint32_t timeout) -> int
       {
         StormSocketConnectionBase * connection = (StormSocketConnectionBase *)ctx;
-        if (connection->m_DecryptBuffer.m_DataAvail == 0)
-        {
-          return MBEDTLS_ERR_SSL_WANT_READ;
-        }
-
-        void * block_start = connection->m_DecryptBuffer.m_Allocator->ResolveHandle(connection->m_DecryptBuffer.m_BlockStart);
-        block_start = Marshal::MemOffset(block_start, connection->m_DecryptBuffer.m_ReadOffset);
-
-        int mem_avail = connection->m_DecryptBuffer.m_Allocator->GetBlockSize() - connection->m_DecryptBuffer.m_ReadOffset;
-        mem_avail = std::min(mem_avail, (int)connection->m_DecryptBuffer.m_DataAvail);
-        mem_avail = std::min(mem_avail, (int)size);
-
-        memcpy(data, block_start, mem_avail);
-        connection->m_DecryptBuffer.DiscardData(mem_avail);
-        return mem_avail;
+        auto read = connection->m_DecryptBuffer.BlockRead(data, size);
+        return read == 0 ? MBEDTLS_ERR_SSL_WANT_READ : read;
       };
 
       mbedtls_ssl_set_bio(&connection.m_SSLContext.m_SSLContext,
@@ -881,6 +993,9 @@ namespace StormSockets
         send_callback,
         recv_callback,
         recv_timeout_callback);
+
+      
+      //mbedtls_debug_set_threshold(5);
 
     }
     else
@@ -909,10 +1024,11 @@ namespace StormSockets
     {
       if (!ec)
       {
-        FinalizeSteamValidation(id);
+        FinalizeConnectToHost(id);
       }
       else
       {
+        Log("Failed to connect to server: %d\n", ec.value());
         ConnectFailed(id);
       }
     };
@@ -920,17 +1036,19 @@ namespace StormSockets
     m_ClientSockets[id]->async_connect(endpoint, connect_callback);
   }
 
-  void StormSocketBackend::FinalizeSteamValidation(StormSocketConnectionId id)
+  void StormSocketBackend::FinalizeConnectToHost(StormSocketConnectionId id)
   {
     auto & connection = GetConnection(id);
 
 #ifndef DISABLE_MBED
     if (connection.m_Frontend->UseSSL(id, connection.m_FrontendId))
     {
-      auto ssl_config = connection.m_Frontend->GetSSLConfig();
+      auto ssl_config = connection.m_Frontend->GetSSLConfig(connection.m_FrontendId);
 
       mbedtls_ssl_init(&connection.m_SSLContext.m_SSLContext);
       mbedtls_ssl_setup(&connection.m_SSLContext.m_SSLContext, ssl_config);
+
+      g_StormSocketsNumTlsConnections++;
 
       connection.m_DecryptBuffer.InitBuffers();
 
@@ -944,40 +1062,15 @@ namespace StormSockets
       auto recv_callback = [](void * ctx, unsigned char * data, size_t size) -> int
       {
         StormSocketConnectionBase * connection = (StormSocketConnectionBase *)ctx;
-        if (connection->m_DecryptBuffer.m_DataAvail == 0)
-        {
-          return MBEDTLS_ERR_SSL_WANT_READ;
-        }
-
-        void * block_start = connection->m_DecryptBuffer.m_Allocator->ResolveHandle(connection->m_DecryptBuffer.m_BlockStart);
-        block_start = Marshal::MemOffset(block_start, connection->m_DecryptBuffer.m_ReadOffset);
-
-        int mem_avail = connection->m_DecryptBuffer.m_Allocator->GetBlockSize() - connection->m_DecryptBuffer.m_ReadOffset;
-        mem_avail = std::min(mem_avail, (int)connection->m_DecryptBuffer.m_DataAvail);
-        mem_avail = std::min(mem_avail, (int)size);
-
-        memcpy(data, block_start, mem_avail);
-        return mem_avail;
+        auto read = connection->m_DecryptBuffer.BlockRead(data, size);
+        return read == 0 ? MBEDTLS_ERR_SSL_WANT_READ : read;
       };
 
       auto recv_timeout_callback = [](void * ctx, unsigned char * data, size_t size, uint32_t timeout) -> int
       {
         StormSocketConnectionBase * connection = (StormSocketConnectionBase *)ctx;
-        if (connection->m_DecryptBuffer.m_DataAvail == 0)
-        {
-          return MBEDTLS_ERR_SSL_WANT_READ;
-        }
-
-        void * block_start = connection->m_DecryptBuffer.m_Allocator->ResolveHandle(connection->m_DecryptBuffer.m_BlockStart);
-        block_start = Marshal::MemOffset(block_start, connection->m_DecryptBuffer.m_ReadOffset);
-
-        int mem_avail = connection->m_DecryptBuffer.m_Allocator->GetBlockSize() - connection->m_DecryptBuffer.m_ReadOffset;
-        mem_avail = std::min(mem_avail, (int)connection->m_DecryptBuffer.m_DataAvail);
-        mem_avail = std::min(mem_avail, (int)size);
-
-        memcpy(data, block_start, mem_avail);
-        connection->m_DecryptBuffer.DiscardData(mem_avail);
-        return mem_avail;
+        auto read = connection->m_DecryptBuffer.BlockRead(data, size);
+        return read == 0 ? MBEDTLS_ERR_SSL_WANT_READ : read;
       };
 
       mbedtls_ssl_set_bio(&connection.m_SSLContext.m_SSLContext,
@@ -986,7 +1079,6 @@ namespace StormSockets
         recv_callback,
         recv_timeout_callback);
 
-      //mbedtls_debug_set_threshold(5);
       int ec = mbedtls_ssl_handshake(&connection.m_SSLContext.m_SSLContext);
 
       char error_str[1024];
@@ -1049,13 +1141,19 @@ namespace StormSockets
           }
           else if (ec != MBEDTLS_ERR_SSL_WANT_READ)
           {
+            if(ec != MBEDTLS_ERR_SSL_CONN_EOF)
+            {
+              Log("SSL error: %d\n", ec);
+            }
+
             SetSocketDisconnected(connection_id);
             SetDisconnectFlag(connection_id, StormSocketDisconnectFlags::kRecvThread);
             return;
           }
           else
           {
-            break;
+            PrepareToRecv(connection_id);
+            return;
           }
         }
       }
@@ -1067,34 +1165,37 @@ namespace StormSockets
         connection.m_UnparsedDataLength.fetch_add((int)bytes_received);
       }
 
-      PrepareToRecv(connection_id);
-
       uint64_t prof = Profiling::StartProfiler();
-      TryProcessReceivedData(connection_id);
+      TryProcessReceivedData(connection_id, false);
       Profiling::EndProfiler(prof, ProfilerCategory::kProcData);
     }
     else
     {
-      connection.m_RecvFailure = true;
-
       uint64_t prof = Profiling::StartProfiler();
-      TryProcessReceivedData(connection_id);
+      TryProcessReceivedData(connection_id, true);
       Profiling::EndProfiler(prof, ProfilerCategory::kProcData);
     }
   }
 
 
-  void StormSocketBackend::TryProcessReceivedData(StormSocketConnectionId connection_id)
+  void StormSocketBackend::TryProcessReceivedData(StormSocketConnectionId connection_id, bool recv_failure)
   {
-    if (ProcessReceivedData(connection_id) == false)
+    if (ProcessReceivedData(connection_id, recv_failure) == false)
     {
       auto recheck_callback = [=]()
       {
-        TryProcessReceivedData(connection_id);
+        TryProcessReceivedData(connection_id, recv_failure);
       };
 
       ProfileScope prof(ProfilerCategory::kRepost);
       m_IOService.post(recheck_callback);
+    }
+    else
+    {
+      if (recv_failure == false)
+      {
+        PrepareToRecv(connection_id);
+      }
     }
   }
 
@@ -1115,7 +1216,7 @@ namespace StormSockets
     m_SendThreadSemaphores[send_thread_index].Release();
   }
 
-  bool StormSocketBackend::ProcessReceivedData(StormSocketConnectionId connection_id)
+  bool StormSocketBackend::ProcessReceivedData(StormSocketConnectionId connection_id, bool recv_failure)
   {
     auto & connection = GetConnection(connection_id);
 
@@ -1126,49 +1227,55 @@ namespace StormSockets
       return false;
     }
 
+    if (connection.m_SlotGen != connection_id.GetGen())
+    {
+      return true;
+    }
+
 #ifndef DISABLE_MBED
     if (connection.m_Frontend->UseSSL(connection_id, connection.m_FrontendId))
     {
       auto prof = ProfileScope(ProfilerCategory::kSSLDecrypt);
       while (true)
       {
-        void * block_mem = connection.m_RecvBuffer.m_Allocator->ResolveHandle(connection.m_RecvBuffer.m_BlockCur);
-        block_mem = Marshal::MemOffset(block_mem, connection.m_RecvBuffer.m_WriteOffset);
-        int mem_avail = connection.m_RecvBuffer.m_Allocator->GetBlockSize() - connection.m_RecvBuffer.m_WriteOffset;
+        StormSocketBufferWriteInfo pointer_info;
+        if (connection.m_RecvBuffer.GetPointerInfo(pointer_info) == false)
+        {
+          throw std::runtime_error("Error getting pointer info for recv buffer");
+        }
 
-        int ret = mbedtls_ssl_read(&connection.m_SSLContext.m_SSLContext, (uint8_t *)block_mem, mem_avail);
-
+        int ret = mbedtls_ssl_read(&connection.m_SSLContext.m_SSLContext, (uint8_t *)pointer_info.m_Ptr1, pointer_info.m_Ptr1Size);
         if (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE)
         {
+          connection.m_RecvBuffer.GotData(0);
           break;
         }
 
         if (ret < 0)
         {
-          char error_str[1024];
-          mbedtls_strerror(ret, error_str, sizeof(error_str));
-
-          SetSocketDisconnected(connection_id);
-          SetDisconnectFlag(connection_id, StormSocketDisconnectFlags::kRecvThread);
-          connection.m_RecvCriticalSection.store(0);
-          return true;
+          connection.m_RecvBuffer.GotData(0);
+          break;
         }
-
-        connection.m_UnparsedDataLength.fetch_add(ret);
-        connection.m_RecvBuffer.GotData(ret);
+        else
+        {
+          connection.m_UnparsedDataLength.fetch_add(ret);
+          connection.m_RecvBuffer.GotData(ret);
+        }
       }
     }
 #endif
 
     bool success = connection.m_Frontend->ProcessData(connection_id, connection.m_FrontendId);
-
-    connection.m_RecvCriticalSection.store(0);
-
-    if (connection.m_RecvFailure)
+    if (recv_failure)
     {
       SetSocketDisconnected(connection_id);
+      connection.m_RecvCriticalSection.store(0);
       SetDisconnectFlag(connection_id, StormSocketDisconnectFlags::kRecvThread);
       success = true;
+    }
+    else
+    {
+      connection.m_RecvCriticalSection.store(0);
     }
 
     return success;
@@ -1184,13 +1291,16 @@ namespace StormSockets
     StormSocketBuffer * buffer = &connection.m_RecvBuffer;
 #endif
 
-    void * buffer_start =
-      Marshal::MemOffset(m_Allocator.ResolveHandle(buffer->m_BlockCur), buffer->m_WriteOffset);
+    StormSocketBufferWriteInfo pointer_info;
+    if (buffer->GetPointerInfo(pointer_info) == false)
+    {
+      throw std::runtime_error("Error getting pointer info for recv buffer");
+    }
 
     std::array<asio::mutable_buffer, 2> buffer_set =
     {
-      asio::buffer(buffer_start, m_FixedBlockSize - buffer->m_WriteOffset),
-      asio::buffer(m_Allocator.ResolveHandle(buffer->m_BlockNext), m_FixedBlockSize)
+      asio::buffer(pointer_info.m_Ptr1, pointer_info.m_Ptr1Size),
+      asio::buffer(pointer_info.m_Ptr2, pointer_info.m_Ptr2Size)
     };
 
     auto recv_callback = [=](const asio::error_code & error, size_t bytes_received) { ProcessNewData(connection_id, error, bytes_received); };
@@ -1214,7 +1324,7 @@ namespace StormSockets
           }
           else
           {
-            while (m_IOResetSemaphore.WaitOne(100) == false)
+            while (m_IOResetSemaphore.WaitOne(1) == false)
             {
               if (m_ThreadStopRequested)
               {
@@ -1225,7 +1335,7 @@ namespace StormSockets
         }
       }
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
   }
 
@@ -1434,7 +1544,6 @@ namespace StormSockets
     int buffer_size = 0;
     int total_size = 0;
 
-
     for (buffer_size = 0; buffer_size < kBufferSetCount; buffer_size++)
     {
       if (block_handle == InvalidBlockHandle)
@@ -1444,6 +1553,7 @@ namespace StormSockets
 
       StormPendingSendBlock * send_block = (StormPendingSendBlock *)m_PendingSendBlocks.ResolveHandle(block_handle);
       buffer_set[buffer_size] = asio::buffer(send_block->m_DataStart, send_block->m_DataLen);
+
       total_size += send_block->m_DataLen;
 
       block_handle = m_PendingSendBlocks.GetNextBlock(block_handle);
@@ -1593,6 +1703,7 @@ namespace StormSockets
     if (connection.m_Frontend->UseSSL(id, connection.m_FrontendId))
     {
       mbedtls_ssl_free(&connection.m_SSLContext.m_SSLContext);
+      g_StormSocketsNumTlsConnections--;
     }
 #endif
 
@@ -1602,7 +1713,13 @@ namespace StormSockets
       block_handle = ReleasePendingSendBlock(block_handle, (StormPendingSendBlock *)m_PendingSendBlocks.ResolveHandle(block_handle));
     }
 
-    m_ClientSockets[id]->close();
+    connection.m_Frontend->CleanupConnection(id, connection.m_FrontendId);
+    connection.m_Frontend->DisassociateConnectionId(id);
+    connection.m_Frontend->FreeFrontendId(connection.m_FrontendId);
+
+    asio::error_code ec;
+
+    m_ClientSockets[id]->close(ec);
     m_ClientSockets[id] = std::experimental::nullopt;
   }
 }

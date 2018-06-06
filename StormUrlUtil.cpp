@@ -1,6 +1,8 @@
 
 #include "StormUrlUtil.h"
 
+#include <string.h>
+
 namespace StormSockets
 {
   bool ValidSchemeCharacter(char c)
@@ -56,35 +58,55 @@ namespace StormSockets
 
   bool ParseURI(const char * uri, StormURI & out_uri)
   {
-    if (*uri == ':')
+    auto colon = strstr(uri, "://");
+    if (colon != nullptr)
     {
-      return false;
-    }
-
-    while (*uri != ':')
-    {
-      if (ValidSchemeCharacter(*uri) == false)
+      if (*uri == ':')
       {
         return false;
       }
 
-      out_uri.m_Protocol.push_back(*uri);
+      while (*uri != ':')
+      {
+        if (ValidSchemeCharacter(*uri) == false)
+        {
+          return false;
+        }
+
+        out_uri.m_Protocol.push_back(*uri);
+        uri++;
+      }
+
+      uri++;
+      if (*uri != '/')
+      {
+        return false;
+      }
+
+      uri++;
+      if (*uri != '/')
+      {
+        return false;
+      }
+
       uri++;
     }
-
-    uri++;
-    if (*uri != '/')
+    else
     {
-      return false;
+      if (*uri == '/')
+      {
+        uri++;
+        if (*uri != '/')
+        {
+          return false;
+        }
+
+        uri++;
+      }
+
+      out_uri.m_Protocol = "http";
     }
 
-    uri++;
-    if (*uri != '/')
-    {
-      return false;
-    }
-
-    uri++;
     if (*uri == '/' || *uri == ':')
     {
       return false;
@@ -92,6 +114,12 @@ namespace StormSockets
 
     while (*uri != '/' && *uri != ':')
     {
+      if (*uri == 0)
+      {
+        out_uri.m_Uri = "/";
+        return true;
+      }
+
       if (ValidHostCharacter(*uri) == false)
       {
         return false;
@@ -111,6 +139,12 @@ namespace StormSockets
 
       while (*uri != '/')
       {
+        if (*uri == 0)
+        {
+          out_uri.m_Uri = "/";
+          return true;
+        }
+
         if (*uri < '0' || *uri > '9')
         {
           return false;

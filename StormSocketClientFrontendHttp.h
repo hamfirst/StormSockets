@@ -14,7 +14,7 @@ namespace StormSockets
   {
   protected:
     StormFixedBlockAllocator m_ConnectionAllocator;
-    StormSocketClientSSLData m_SSLData;
+    std::unique_ptr<StormSocketClientSSLData[]> m_SSLData;
 
     StormHttpHeaderValues m_HeaderValues;
   public:
@@ -25,12 +25,14 @@ namespace StormSockets
     StormSocketConnectionId RequestConnect(const char * ip_addr, int port, const StormSocketClientFrontendHttpRequestData & request_data);
     StormSocketConnectionId RequestConnect(const StormURI & uri, const void * body, int body_len, const void * headers, int header_len);
     StormSocketConnectionId RequestConnect(const char * url, const void * body, int body_len, const void * headers, int header_len);
+    StormSocketConnectionId RequestConnect(const StormURI & uri, const char * method, const void * body, int body_len, const void * headers, int header_len);
 
     void FreeIncomingHttpResponse(StormHttpResponseReader & reader);
+    void MemoryAudit();
 
 #ifndef DISABLE_MBED
     bool UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
-    mbedtls_ssl_config * GetSSLConfig() { return &m_SSLData.m_SSLConfig; }
+    mbedtls_ssl_config * GetSSLConfig(StormSocketFrontendConnectionId frontend_id);
 #endif
 
   protected:
@@ -42,6 +44,8 @@ namespace StormSockets
 
     void InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data);
     void CleanupConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
+
+    void QueueDisconnectEvent(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) override;
 
     bool ProcessData(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
     bool ParseStatusLine(StormMessageReaderCursor & status_line, StormSocketClientConnectionHttp & http_connection);
