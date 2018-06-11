@@ -36,6 +36,23 @@
 
 std::atomic_int g_StormSocketsNumTlsConnections = {};
 
+static struct StormMbedTlsInit
+{
+  StormMbedTlsInit()
+  {
+    mbedtls_threading_set_alt(
+      [](mbedtls_threading_mutex_t * mtx) { *mtx = new std::mutex(); },
+      [](mbedtls_threading_mutex_t * mtx) { auto m = (std::mutex *)*mtx; delete m; },
+      [](mbedtls_threading_mutex_t * mtx) { auto m = (std::mutex *)*mtx; m->lock(); return 0; },
+      [](mbedtls_threading_mutex_t * mtx) { auto m = (std::mutex *)*mtx; m->unlock(); return 0; });
+  }
+
+  void Reference()
+  {
+
+  }
+
+} s_StormMbedTlsInit;
 
 namespace StormSockets
 {
@@ -49,7 +66,6 @@ namespace StormSockets
     std::atomic_int * m_RefCount;
   };
 
-
   StormSocketBackend::StormSocketBackend(const StormSocketInitSettings & settings) :
     m_Allocator(settings.HeapSize, settings.BlockSize, false),
     m_MessageReaders(settings.MaxPendingOutgoingPacketsPerConnection * sizeof(StormMessageReaderData) * settings.MaxConnections, sizeof(StormMessageReaderData), false),
@@ -58,6 +74,8 @@ namespace StormSockets
     m_ClosingConnectionQueue(settings.MaxConnections),
     m_Resolver(m_IOService)
   {
+    s_StormMbedTlsInit.Reference();
+
     m_NextAcceptorId = 0;
     m_MaxConnections = settings.MaxConnections;
     m_ThreadStopRequested = false;
