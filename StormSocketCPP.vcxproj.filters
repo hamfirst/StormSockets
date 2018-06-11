@@ -32,7 +32,6 @@
     <ClCompile Include="StormUrlUtil.cpp" />
     <ClCompile Include="StormMessageReaderUtil.cpp" />
     <ClCompile Include="StormSocketLog.cpp" />
-    <ClCompile Include="StormSockets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StormFixedBlockAllocator.h" />
@@ -77,6 +76,5 @@
     <ClInclude Include="StormUrlUtil.h" />
     <ClInclude Include="StormMessageReaderUtil.h" />
     <ClInclude Include="StormSocketLog.h" />
-    <ClInclude Include="StormSockets.h" />
   </ItemGroup>
 </Project>

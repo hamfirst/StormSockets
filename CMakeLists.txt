@@ -39,6 +39,7 @@ add_library(StormSockets STATIC
 	StormSocketFrontendBase.cpp
 	StormSocketFrontendHttpBase.cpp
 	StormSocketFrontendWebsocketBase.cpp
+	StormSocketLog.cpp
 	StormSocketServerFrontendHttp.cpp
 	StormSocketServerFrontendWebsocket.cpp
 	StormSocketServerWebsocket.cpp
