@@ -1,8 +1,7 @@
 
 #include "StormSocketClientFrontendHttp.h"
 #include "StormSocketConnectionHttp.h"
-
-void Log(const char * fmt, ...);
+#include "StormSocketLog.h"
 
 namespace StormSockets
 {
@@ -191,7 +190,7 @@ namespace StormSockets
 
     if (http_connection.m_CompleteResponse == false) 
     {
-      Log("Disconnected after getting %d bytes\n", http_connection.m_TotalLength);
+      StormSocketLog("Disconnected after getting %d bytes\n", http_connection.m_TotalLength);
     }
 
     StormSocketFrontendHttpBase::QueueDisconnectEvent(connection_id, frontend_id);
@@ -243,7 +242,7 @@ namespace StormSockets
 
             if (ParseStatusLine(cur_header, http_connection) == false)
             {
-              Log("Got invalid status line\n");
+              StormSocketLog("Got invalid status line\n");
               ForceDisconnect(connection_id);
               return true;
             }
@@ -268,7 +267,7 @@ namespace StormSockets
             {
               if (cur_header.ReadNumber(http_connection.m_BodyLength) == false)
               {
-                Log("Got invalid content length\n");
+                StormSocketLog("Got invalid content length\n");
                 ForceDisconnect(connection_id);
                 return true;
               }
