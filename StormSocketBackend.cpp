@@ -1,5 +1,6 @@
 
 #include "StormSocketBackend.h"
+#include "StormSocketLog.h"
 
 #include <fstream>
 
@@ -35,7 +36,6 @@
 
 std::atomic_int g_StormSocketsNumTlsConnections = {};
 
-void Log(const char * fmt, ...);
 
 namespace StormSockets
 {
@@ -305,7 +305,7 @@ namespace StormSockets
 
     if(ec)
     {
-      Log("Could not create new client socket\n");
+      StormSocketLog("Could not create new client socket\n");
       return StormSocketConnectionId::InvalidConnectionId;
     }
 
@@ -315,7 +315,7 @@ namespace StormSockets
 
     if (connection_id == StormSocketConnectionId::InvalidConnectionId)
     {
-      Log("Could not allocate connection id\n");
+      StormSocketLog("Could not allocate connection id\n");
 
       socket.close();
       return StormSocketConnectionId::InvalidConnectionId;
@@ -349,12 +349,12 @@ namespace StormSockets
             ++itr;
           }
                 
-          Log("Resolve failed\n");
+          StormSocketLog("Resolve failed\n");
           ConnectFailed(connection_id);
         }
         else
         {
-          Log("Resolve failed\n");
+          StormSocketLog("Resolve failed\n");
           ConnectFailed(connection_id);
         }
       };
@@ -860,7 +860,7 @@ namespace StormSockets
 
               if (m_Connections[index].m_SlotGen == slot_gen && m_Connections[index].m_HandshakeComplete == false)
               {
-                Log("Handshake timeout\n");
+                StormSocketLog("Handshake timeout\n");
                 ForceDisconnect(connection_id);
               }
             }
@@ -977,14 +977,14 @@ namespace StormSockets
       auto recv_callback = [](void * ctx, unsigned char * data, size_t size) -> int
       {
         StormSocketConnectionBase * connection = (StormSocketConnectionBase *)ctx;
-        auto read = connection->m_DecryptBuffer.BlockRead(data, size);
+        auto read = connection->m_DecryptBuffer.BlockRead(data, (int)size);
         return read == 0 ? MBEDTLS_ERR_SSL_WANT_READ : read;
       };
 
       auto recv_timeout_callback = [](void * ctx, unsigned char * data, size_t size, uint32_t timeout) -> int
       {
         StormSocketConnectionBase * connection = (StormSocketConnectionBase *)ctx;
-        auto read = connection->m_DecryptBuffer.BlockRead(data, size);
+        auto read = connection->m_DecryptBuffer.BlockRead(data, (int)size);
         return read == 0 ? MBEDTLS_ERR_SSL_WANT_READ : read;
       };
 
@@ -1028,7 +1028,7 @@ namespace StormSockets
       }
       else
       {
-        Log("Failed to connect to server: %d\n", ec.value());
+        StormSocketLog("Failed to connect to server: %d\n", ec.value());
         ConnectFailed(id);
       }
     };
@@ -1062,14 +1062,14 @@ namespace StormSockets
       auto recv_callback = [](void * ctx, unsigned char * data, size_t size) -> int
       {
         StormSocketConnectionBase * connection = (StormSocketConnectionBase *)ctx;
-        auto read = connection->m_DecryptBuffer.BlockRead(data, size);
+        auto read = connection->m_DecryptBuffer.BlockRead(data, (int)size);
         return read == 0 ? MBEDTLS_ERR_SSL_WANT_READ : read;
       };
 
       auto recv_timeout_callback = [](void * ctx, unsigned char * data, size_t size, uint32_t timeout) -> int
       {
         StormSocketConnectionBase * connection = (StormSocketConnectionBase *)ctx;
-        auto read = connection->m_DecryptBuffer.BlockRead(data, size);
+        auto read = connection->m_DecryptBuffer.BlockRead(data, (int)size);
         return read == 0 ? MBEDTLS_ERR_SSL_WANT_READ : read;
       };
 
@@ -1143,7 +1143,7 @@ namespace StormSockets
           {
             if(ec != MBEDTLS_ERR_SSL_CONN_EOF)
             {
-              Log("SSL error: %d\n", ec);
+              StormSocketLog("SSL error: %d\n", ec);
             }
 
             SetSocketDisconnected(connection_id);

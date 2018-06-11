@@ -261,6 +261,7 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="StormSocketFrontendWebsocketBase.cpp" />
+    <ClCompile Include="StormSocketLog.cpp" />
     <ClCompile Include="StormSocketServerFrontendHttp.cpp">
       <SubType>
       </SubType>
@@ -320,6 +321,7 @@
     </ClInclude>
     <ClInclude Include="StormSocketFrontendWebsocketBase.h" />
     <ClInclude Include="StormSocketIOOperation.h" />
+    <ClInclude Include="StormSocketLog.h" />
     <ClInclude Include="StormSocketRequest.h" />
     <ClInclude Include="StormSocketServerFrontendHttp.h">
       <SubType>
