@@ -7,6 +7,7 @@
 #ifndef DISABLE_MBED
 #include "mbedtls/error.h"
 #include "mbedtls/debug.h"
+#include "mbedtls/threading.h"
 #endif
 
 #ifndef DISABLE_MBED

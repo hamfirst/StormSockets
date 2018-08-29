@@ -119,7 +119,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_WINDOWS;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_MBED;USE_WINSEC</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_MBED;USE_WINSEC</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\External;%(AdditionalIncludeDirectories);$(SolutionDir)\</AdditionalIncludeDirectories>
     </ClCompile>
@@ -135,9 +135,10 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_WINDOWS;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_MBED;USE_WINSEC</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_MBED;USE_WINSEC</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\External;%(AdditionalIncludeDirectories);$(SolutionDir)\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,7 +154,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_WINDOWS;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_WINSEC;USE_MBED</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_WINSEC;USE_MBED</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\External;%(AdditionalIncludeDirectories);$(SolutionDir)\</AdditionalIncludeDirectories>
     </ClCompile>
@@ -173,7 +174,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_WINDOWS;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_WINSEC;USE_MBED</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_WINSEC;USE_MBED</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\External;%(AdditionalIncludeDirectories);$(SolutionDir)\</AdditionalIncludeDirectories>
     </ClCompile>
@@ -193,9 +194,10 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_WINDOWS;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_WINSEC;USE_MBED</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_WINSEC;USE_MBED</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\External;%(AdditionalIncludeDirectories);$(SolutionDir)\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -213,7 +215,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_WINDOWS;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_WINSEC;USE_MBED</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);SECURITY_WIN32;_WIN32_WINNT=0x0601;USE_WINSEC;USE_MBED</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\External;%(AdditionalIncludeDirectories);$(SolutionDir)\</AdditionalIncludeDirectories>
     </ClCompile>
