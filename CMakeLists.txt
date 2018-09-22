@@ -82,5 +82,9 @@ set(HEADER_StormSocketCPP
             ./StormWebsocketMessageReader.h
             ./StormWebsocketMessageWriter.h
             )
+            
+if(MSVC)
+  add_definitions(/DSECURITY_WIN32 /D_WIN32_WINNT=0x0601)
+endif()
 
-add_library(StormSocketCPP ${SRC_StormSocketCPP} ${HEADER_StormSocketCPP})
+add_library(StormSocketCPP STATIC ${SRC_StormSocketCPP} ${HEADER_StormSocketCPP})
