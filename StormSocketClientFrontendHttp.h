@@ -31,31 +31,31 @@ namespace StormSockets
     void MemoryAudit();
 
 #ifndef DISABLE_MBED
-    bool UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
-    mbedtls_ssl_config * GetSSLConfig(StormSocketFrontendConnectionId frontend_id);
+    bool UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) override;
+    mbedtls_ssl_config * GetSSLConfig(StormSocketFrontendConnectionId frontend_id) override;
 #endif
 
   protected:
 
     StormSocketClientConnectionHttp & GetHttpConnection(StormSocketFrontendConnectionId id);
 
-    StormSocketFrontendConnectionId AllocateFrontendId();
-    void FreeFrontendId(StormSocketFrontendConnectionId frontend_id);
+    StormSocketFrontendConnectionId AllocateFrontendId() override;
+    void FreeFrontendId(StormSocketFrontendConnectionId frontend_id) override;
 
-    void InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data);
-    void CleanupConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
+    void InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data) override;
+    void CleanupConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) override;
 
     void QueueDisconnectEvent(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) override;
 
-    bool ProcessData(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
+    bool ProcessData(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) override;
     bool ParseStatusLine(StormMessageReaderCursor & status_line, StormSocketClientConnectionHttp & http_connection);
 
-    void ConnectionEstablishComplete(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
+    void ConnectionEstablishComplete(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) override;
 
-    void AddBodyBlock(StormSocketConnectionId connection_id, StormHttpConnectionBase & http_connection, void * chunk_ptr, int chunk_len, int read_offset);
-    bool CompleteBody(StormSocketConnectionId connection_id, StormHttpConnectionBase & http_connection);
+    void AddBodyBlock(StormSocketConnectionId connection_id, StormHttpConnectionBase & http_connection, void * chunk_ptr, int chunk_len, int read_offset) override;
+    bool CompleteBody(StormSocketConnectionId connection_id, StormHttpConnectionBase & http_connection) override;
 
-    void SendClosePacket(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
+    void SendClosePacket(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) override;
   };
 }
 

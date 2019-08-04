@@ -27,19 +27,12 @@ namespace StormSockets
 		int GetIndex() const { return m_Index.GetIndex(); }
 		int GetGen() const { return m_Index.GetGen(); }
 	};
-}
 
-namespace std
-{
-  template< class Key >
-  struct hash;
-
-  template <>
-  struct hash<StormSockets::StormSocketConnectionId>
+  struct StormSocketConnectionIdHash
   {
-    int operator()(StormSockets::StormSocketConnectionId const & id) const
+    std::size_t operator()(StormSockets::StormSocketConnectionId const & id) const
     {
-      return (int)id.m_Index.Raw;
+      return (std::size_t)id.m_Index.Raw;
     }
   };   
 }

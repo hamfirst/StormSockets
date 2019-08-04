@@ -53,8 +53,11 @@ namespace StormSockets
 
   struct StormSocketInitSettings
   {
+#ifndef _INCLUDEOS
     int NumIOThreads = std::thread::hardware_concurrency();
     int NumSendThreads = std::thread::hardware_concurrency();
+ #endif
+
     int MaxConnections = 256;
 
     int HeapSize = 10 * 1024 * 1024; // 10 megs
@@ -65,6 +68,7 @@ namespace StormSockets
     int MaxSendQueueElements = 32;
     int MaxPendingSendBlocks = 1024 * 16;
     int HandshakeTimeout = 0;
+    bool LoadSystemCertificates = false;
   };
 
   struct StormSocketServerSSLSettings

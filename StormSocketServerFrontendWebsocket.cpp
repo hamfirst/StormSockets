@@ -7,9 +7,9 @@ namespace StormSockets
     const StormSocketServerFrontendWebsocketSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendWebsocketBase(settings, backend),
     m_ConnectionAllocator(sizeof(StormSocketServerConnectionWebSocket) * settings.MaxConnections, sizeof(StormSocketServerConnectionWebSocket), false),
+    m_SSLData(std::make_unique<StormSocketServerSSLData[]>(kDefaultSSLConfigs)),
     m_HeaderValues(settings.Protocol),
-    m_MaxHeaderSize(settings.MaxHeaderSize),
-    m_SSLData(std::make_unique<StormSocketServerSSLData[]>(kDefaultSSLConfigs))
+    m_MaxHeaderSize(settings.MaxHeaderSize)
   {
     for (int index = 0; index < kDefaultSSLConfigs; ++index)
     {
@@ -73,7 +73,8 @@ namespace StormSockets
     m_ConnectionAllocator.FreeBlock(&ws_connection, StormFixedBlockType::Custom);
   }
 
-  void StormSocketServerFrontendWebsocket::InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data)
+  void StormSocketServerFrontendWebsocket::InitConnection([[maybe_unused]] StormSocketConnectionId connection_id, 
+    [[maybe_unused]] StormSocketFrontendConnectionId frontend_id, [[maybe_unused]] const void * init_data)
   {
     auto & ws_connection = GetWSConnection(frontend_id);
 
@@ -82,10 +83,11 @@ namespace StormSockets
     m_HeaderValues.WriteHeader(ws_connection.m_PendingWriter, StormWebsocketHeaderType::Response);
   }
 
-  void StormSocketServerFrontendWebsocket::CleanupConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  void StormSocketServerFrontendWebsocket::CleanupConnection([[maybe_unused]] StormSocketConnectionId connection_id, 
+    [[maybe_unused]] StormSocketFrontendConnectionId frontend_id)
   {
     auto & ws_connection = GetWSConnection(frontend_id);
-    StormSocketFrontendWebsocketBase::CleanupConnection(ws_connection);
+    StormSocketFrontendWebsocketBase::CleanupWebsocketConnection(ws_connection);
 
     if (ws_connection.m_State == StormSocketServerConnectionWebsocketState::HandShake ||
         ws_connection.m_State == StormSocketServerConnectionWebsocketState::SendHandshakeResponse ||
@@ -166,8 +168,8 @@ namespace StormSockets
             {
               ws_connection.m_GotWebsocketVerHeader = true;
             }
-            else if (m_HasProtocol == false && ws_connection.m_GotWebsocketProtoHeader == false &&
-              m_HeaderValues.MatchExact(cur_header, header_val_lowercase, StormWebsocketHeaderType::WebsocketProtoHeader))
+            else if (m_HasProtocol && ws_connection.m_GotWebsocketProtoHeader == false &&
+              m_HeaderValues.Match(cur_header, header_val_lowercase, StormWebsocketHeaderType::WebsocketProtoHeader))
             {
               ws_connection.m_GotWebsocketProtoHeader = true;
             }
@@ -236,7 +238,8 @@ namespace StormSockets
     }
   }
 
-  void StormSocketServerFrontendWebsocket::SendClosePacket(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  void StormSocketServerFrontendWebsocket::SendClosePacket(StormSocketConnectionId connection_id, 
+    [[maybe_unused]] StormSocketFrontendConnectionId frontend_id)
   {
     // Send a disconnect packet
     StormWebsocketMessageWriter disconnect_writer = CreateOutgoingPacket(StormWebsocketOp::Close, true);

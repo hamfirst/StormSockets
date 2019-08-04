@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 
-include_directories(. ../. .././External)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/.. ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/External)
+
 set(CMAKE_CXX_STANDARD 17)
 
-set(SRC_StormSocketCPP 
+set(SRC_StormSocketCPP
             ./StormFixedBlockAllocator.cpp
             ./StormHttpBodyReader.cpp
             ./StormHttpHeaderValues.cpp
@@ -37,7 +38,7 @@ set(SRC_StormSocketCPP
             ./StormWebsocketMessageReader.cpp
             ./StormWebsocketMessageWriter.cpp
             )
-set(HEADER_StormSocketCPP 
+set(HEADER_StormSocketCPP
             ./StormFixedBlockAllocator.h
             ./StormGenIndex.h
             ./StormHttpBodyReader.h
@@ -54,6 +55,7 @@ set(HEADER_StormSocketCPP
             ./StormMessageReaderData.h
             ./StormMessageReaderUtil.h
             ./StormMessageWriter.h
+            ./StormMutex.h
             ./StormProfiling.h
             ./StormSemaphore.h
             ./StormSha1.h
@@ -82,7 +84,7 @@ set(HEADER_StormSocketCPP
             ./StormWebsocketMessageReader.h
             ./StormWebsocketMessageWriter.h
             )
-            
+
 if(MSVC)
   add_definitions(/DSECURITY_WIN32 /D_WIN32_WINNT=0x0601)
 endif()

@@ -12,9 +12,9 @@ namespace StormSockets
 {
   StormSocketClientFrontendWebsocket::StormSocketClientFrontendWebsocket(const StormSocketClientFrontendWebsocketSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendWebsocketBase(settings, backend),
-    m_HeaderValues(nullptr),
     m_ConnectionAllocator(sizeof(StormSocketClientConnectionWebsocket) * settings.MaxConnections, sizeof(StormSocketClientConnectionWebsocket), false),
-    m_SSLData(std::make_unique<StormSocketClientSSLData[]>(kDefaultSSLConfigs))
+    m_SSLData(std::make_unique<StormSocketClientSSLData[]>(kDefaultSSLConfigs)),
+    m_HeaderValues(nullptr)
   {
     for (int index = 0; index < kDefaultSSLConfigs; ++index)
     {
@@ -38,7 +38,8 @@ namespace StormSockets
   }
 
 #ifndef DISABLE_MBED
-  bool StormSocketClientFrontendWebsocket::UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  bool StormSocketClientFrontendWebsocket::UseSSL([[maybe_unused]] StormSocketConnectionId connection_id, 
+    [[maybe_unused]] StormSocketFrontendConnectionId frontend_id)
   {
     auto & ws_connection = GetWSConnection(frontend_id);
     return ws_connection.m_UseSSL;
@@ -80,7 +81,8 @@ namespace StormSockets
     m_ConnectionAllocator.FreeBlock(&ws_connection, StormFixedBlockType::Custom);
   }
 
-  void StormSocketClientFrontendWebsocket::InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data)
+  void StormSocketClientFrontendWebsocket::InitConnection([[maybe_unused]] StormSocketConnectionId connection_id, 
+    [[maybe_unused]] StormSocketFrontendConnectionId frontend_id, const void * init_data)
   {
     StormSocketClientFrontendWebsocketRequestData * request_data = (StormSocketClientFrontendWebsocketRequestData *)init_data;
 
@@ -94,10 +96,11 @@ namespace StormSockets
     if(request_data->m_Origin) ws_connection.m_Origin = request_data->m_Origin;
   }
 
-  void StormSocketClientFrontendWebsocket::CleanupConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  void StormSocketClientFrontendWebsocket::CleanupConnection([[maybe_unused]] StormSocketConnectionId connection_id, 
+    [[maybe_unused]] StormSocketFrontendConnectionId frontend_id)
   {
     auto & ws_connection = GetWSConnection(frontend_id);
-    StormSocketFrontendWebsocketBase::CleanupConnection(ws_connection);
+    StormSocketFrontendWebsocketBase::CleanupWebsocketConnection(ws_connection);
 
     if (ws_connection.m_State == StormSocketServerConnectionWebsocketState::SendHandshakeResponse ||
       ws_connection.m_State == StormSocketServerConnectionWebsocketState::SendPong)
@@ -204,7 +207,7 @@ namespace StormSockets
                     break;
                   }
 
-                  test_hash = crc32additive(test_hash, c);
+                  test_hash = crc32additive(test_hash, tolower(c));
                 }
 
                 test_hash = crc32end(test_hash);
@@ -288,8 +291,7 @@ namespace StormSockets
     auto writer = m_Backend->CreateWriter();
 
     auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-
-    std::mt19937_64 generator(seed);
+    static std::mt19937_64 generator(seed);
 
     char sec_key[256];
     int offs = 0;
@@ -358,7 +360,7 @@ namespace StormSockets
     SendPacketToConnectionBlocking(writer, connection_id);
   }
 
-  void StormSocketClientFrontendWebsocket::SendClosePacket(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  void StormSocketClientFrontendWebsocket::SendClosePacket(StormSocketConnectionId connection_id, [[maybe_unused]] StormSocketFrontendConnectionId frontend_id)
   {
     // Send a disconnect packet
     StormWebsocketMessageWriter disconnect_writer = CreateOutgoingPacket(StormWebsocketOp::Close, true);

@@ -61,9 +61,9 @@ namespace StormSockets
 		StormMessageQueue<StormSocketEventInfo> m_EventQueue;
     StormSocketBackend * m_Backend;
 
-    std::unordered_set<StormSocketConnectionId> m_OwnedConnections;
-    std::mutex m_OwnedConnectionMutex;
-    std::unique_lock<std::mutex> m_OwnedConnectionLock;
+    std::unordered_set<StormSocketConnectionId, StormSocketConnectionIdHash> m_OwnedConnections;
+    StormMutex m_OwnedConnectionMutex;
+    StormUniqueLock<StormMutex> m_OwnedConnectionLock;
 
     StormSemaphore * m_EventSemaphore;
 

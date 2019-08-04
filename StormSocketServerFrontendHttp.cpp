@@ -7,9 +7,9 @@ namespace StormSockets
 {
   StormSocketServerFrontendHttp::StormSocketServerFrontendHttp(const StormSocketServerFrontendHttpSettings & settings, StormSocketBackend * backend) :
     StormSocketFrontendHttpBase(settings, backend),
-    m_HeaderValues(),
     m_ConnectionAllocator(sizeof(StormSocketServerConnectionHttp) * settings.MaxConnections, sizeof(StormSocketServerConnectionHttp), false),
-    m_SSLData(std::make_unique<StormSocketServerSSLData[]>(kDefaultSSLConfigs))
+    m_SSLData(std::make_unique<StormSocketServerSSLData[]>(kDefaultSSLConfigs)),
+    m_HeaderValues()
   {
     for (int index = 0; index < kDefaultSSLConfigs; ++index)
     {
@@ -93,12 +93,14 @@ namespace StormSockets
     m_ConnectionAllocator.FreeBlock(&http_connection, StormFixedBlockType::Custom);
   }
 
-  void StormSocketServerFrontendHttp::InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data)
+  void StormSocketServerFrontendHttp::InitConnection([[maybe_unused]] StormSocketConnectionId connection_id, 
+    [[maybe_unused]] StormSocketFrontendConnectionId frontend_id, [[maybe_unused]] const void * init_data)
   {
     //auto & http_connection = GetHttpConnection(frontend_id);
   }
 
-  void StormSocketServerFrontendHttp::CleanupConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  void StormSocketServerFrontendHttp::CleanupConnection([[maybe_unused]] StormSocketConnectionId connection_id, 
+    [[maybe_unused]] StormSocketFrontendConnectionId frontend_id)
   {
     //auto & http_connection = GetHttpConnection(frontend_id);
   }
@@ -346,7 +348,8 @@ namespace StormSockets
   }
 
 
-  void StormSocketServerFrontendHttp::SendClosePacket(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  void StormSocketServerFrontendHttp::SendClosePacket([[maybe_unused]] StormSocketConnectionId connection_id, 
+    [[maybe_unused]] StormSocketFrontendConnectionId frontend_id)
   {
 
   }

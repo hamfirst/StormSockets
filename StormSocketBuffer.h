@@ -1,18 +1,18 @@
 #pragma once
 
 #include "StormFixedBlockAllocator.h"
+#include "StormMutex.h"
 
 #include <atomic>
-#include <mutex>
 
 namespace StormSockets
 {
   struct StormSocketBufferWriteInfo
   {
     void * m_Ptr1;
-    size_t m_Ptr1Size;
+    std::size_t m_Ptr1Size;
     void * m_Ptr2;
-    size_t m_Ptr2Size;
+    std::size_t m_Ptr2Size;
   };
 
   struct StormSocketBuffer
@@ -45,6 +45,6 @@ namespace StormSockets
     std::atomic_int m_FreeSpaceAvail;
     std::atomic_bool m_InUse;
 
-    std::mutex m_Mutex;
+    StormMutex m_Mutex;
   };
 }

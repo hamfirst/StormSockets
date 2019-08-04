@@ -1,6 +1,7 @@
 #include "StormWebsocketHeaderValues.h"
 
 #include <stdexcept>
+#include <algorithm>
 
 namespace StormSockets
 {
@@ -19,6 +20,8 @@ namespace StormSockets
     if (protocol != NULL)
     {
       strs.push_back(std::string("sec-websocket-protocol: ") + std::string(protocol));
+      std::transform(strs.back().begin(), strs.back().end(), strs.back().begin(), ::tolower);
+
       strs.push_back(std::string("HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Protocol: ") +
         std::string(protocol) + std::string("\r\nSec-WebSocket-Accept: "));
     }

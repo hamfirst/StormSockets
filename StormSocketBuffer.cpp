@@ -67,7 +67,7 @@ namespace StormSockets
 
   void StormSocketBuffer::InitBuffers()
   {
-    std::unique_lock<std::mutex> lock(m_Mutex);
+    StormUniqueLock<StormMutex> lock(m_Mutex);
     m_BlockStart = m_Allocator->AllocateBlock(StormFixedBlockType::BlockMem);
     m_BlockCur = m_BlockStart;
     m_BlockNext = m_Allocator->AllocateBlock(m_BlockCur, StormFixedBlockType::BlockMem);
@@ -77,7 +77,7 @@ namespace StormSockets
 
   void StormSocketBuffer::GotData(int bytes_received)
   {
-    std::unique_lock<std::mutex> lock(m_Mutex);
+    StormUniqueLock<StormMutex> lock(m_Mutex);
 
     m_WriteOffset += bytes_received;
 	  m_FreeSpaceAvail.fetch_sub(bytes_received);
@@ -110,7 +110,7 @@ namespace StormSockets
 
   void StormSocketBuffer::FreeBuffers()
   {
-    std::unique_lock<std::mutex> lock(m_Mutex);
+    StormUniqueLock<StormMutex> lock(m_Mutex);
 
     if (m_BlockStart != InvalidBlockHandle)
     {
@@ -127,7 +127,7 @@ namespace StormSockets
 
   void StormSocketBuffer::DiscardData(int amount)
   {
-    std::unique_lock<std::mutex> lock(m_Mutex);
+    StormUniqueLock<StormMutex> lock(m_Mutex);
 
     if (m_DataAvail < amount)
     {
@@ -151,7 +151,7 @@ namespace StormSockets
 
   int StormSocketBuffer::BlockRead(void * buffer, int size)
   {
-    std::unique_lock<std::mutex> lock(m_Mutex);
+    StormUniqueLock<StormMutex> lock(m_Mutex);
 
 	  int read = 0;
 
@@ -197,7 +197,7 @@ namespace StormSockets
 
   bool StormSocketBuffer::GetPointerInfo(StormSocketBufferWriteInfo & info)
   {
-    std::unique_lock<std::mutex> lock(m_Mutex);
+    StormUniqueLock<StormMutex> lock(m_Mutex);
     if (m_InUse.exchange(true) == true)
     {
       return false;

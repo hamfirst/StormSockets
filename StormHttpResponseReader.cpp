@@ -8,10 +8,12 @@ namespace StormSockets
 {
   StormHttpResponseReader::StormHttpResponseReader(void * block, int data_len, int read_offset, StormSocketConnectionId connection_id,
     StormFixedBlockAllocator * block_allocator, StormFixedBlockAllocator * reader_allocator,
-    const StormMessageReaderCursor & status_line, StormMessageReaderCursor & response_phrase, StormMessageHeaderReader & headers) :
+    const StormMessageReaderCursor & status_line, StormMessageReaderCursor & response_phrase,
+    StormMessageHeaderReader & headers, int response_code) :
     m_StatusLine(status_line),
     m_ResponsePhrase(response_phrase),
-    m_Headers(headers)
+    m_Headers(headers),
+    m_ResponseCode(response_code)
   {
     m_Allocator = block_allocator;
     m_ReaderAllocator = reader_allocator;

@@ -27,12 +27,12 @@ namespace StormSockets
     int m_ChunkSize = 0;
     int m_RecievedLength = 0;
 
-    std::experimental::optional<StormMessageHeaderReader> m_Headers;
+    std::optional<StormMessageHeaderReader> m_Headers;
   };
 
   struct StormSocketClientConnectionHttp : public StormHttpConnectionBase
   {
-    std::experimental::optional<StormHttpRequestWriter> m_RequestWriter;
+    std::optional<StormHttpRequestWriter> m_RequestWriter;
 
     bool m_UseSSL = false;
 
@@ -41,9 +41,9 @@ namespace StormSockets
 
     int m_ResponseCode = 0;
 
-    std::experimental::optional<StormMessageReaderCursor> m_StatusLine;
-    std::experimental::optional<StormMessageReaderCursor> m_ResponsePhrase;
-    std::experimental::optional<StormHttpResponseReader> m_BodyReader;
+    std::optional<StormMessageReaderCursor> m_StatusLine;
+    std::optional<StormMessageReaderCursor> m_ResponsePhrase;
+    std::optional<StormHttpResponseReader> m_BodyReader;
   };
 
   struct StormSocketServerConnectionHttp : public StormHttpConnectionBase
@@ -51,8 +51,8 @@ namespace StormSockets
     bool m_GotRequestLine = false;
     bool m_CompleteRequest = false;
 
-    std::experimental::optional<StormMessageReaderCursor> m_RequestMethod;
-    std::experimental::optional<StormMessageReaderCursor> m_RequestURI;
-    std::experimental::optional<StormHttpRequestReader> m_BodyReader;
+    std::optional<StormMessageReaderCursor> m_RequestMethod;
+    std::optional<StormMessageReaderCursor> m_RequestURI;
+    std::optional<StormHttpRequestReader> m_BodyReader;
   };
 }

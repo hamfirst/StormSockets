@@ -28,6 +28,6 @@ namespace StormSockets
     StormWebsocketMessageWriter CreateOutgoingPacket(StormWebsocketOp::Index mode, bool final);
     bool ProcessWebsocketData(StormSocketConnectionBase & connection, StormWebsocketConnectionBase & ws_connection, StormSocketConnectionId connection_id);
 
-    void CleanupConnection(StormWebsocketConnectionBase & ws_connection);
+    void CleanupWebsocketConnection(StormWebsocketConnectionBase & ws_connection);
   };
 }

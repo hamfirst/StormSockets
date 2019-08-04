@@ -27,6 +27,7 @@ namespace StormSockets
     StormMessageReaderCursor m_StatusLine;
     StormMessageReaderCursor m_ResponsePhrase;
     StormMessageHeaderReader m_Headers;
+    int m_ResponseCode;
 
     friend class StormSocketClientFrontendHttp;
     friend class StormSocketFrontendHttpBase;
@@ -40,11 +41,13 @@ namespace StormSockets
     StormMessageReaderCursor GetStatusLineReader() { return m_StatusLine; };
     StormMessageReaderCursor GetResponsePhraseReader() { return m_ResponsePhrase; }
     StormMessageHeaderReader GetHeaderReader() { return m_Headers; }
+    int GetResponseCode() const { return m_ResponseCode; }
 
   private:
     StormHttpResponseReader(void * block, int data_len, int read_offset, StormSocketConnectionId connection_id,
       StormFixedBlockAllocator * block_allocator, StormFixedBlockAllocator * reader_allocator,
-      const StormMessageReaderCursor & status_line, StormMessageReaderCursor & response_phrase, StormMessageHeaderReader & headers);
+      const StormMessageReaderCursor & status_line, StormMessageReaderCursor & response_phrase, StormMessageHeaderReader & headers,
+      int response_code);
 
     void AddBlock(void * block, int data_len, int read_offset);
     void FreeChain();

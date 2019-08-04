@@ -264,6 +264,8 @@ namespace StormSockets
         if (data_avail > length)
         {
           memcpy(data, Marshal::MemOffset(cur_block, read_offset), length);
+          read_offset += length;
+          data_length -= length;
           length = 0;
           break;
         }

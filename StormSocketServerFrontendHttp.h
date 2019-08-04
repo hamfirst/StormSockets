@@ -25,7 +25,7 @@ namespace StormSockets
     ~StormSocketServerFrontendHttp();
 
 #ifndef DISABLE_MBED
-    bool UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) { return m_UseSSL; }
+    bool UseSSL([[maybe_unused]] StormSocketConnectionId connection_id, [[maybe_unused]] StormSocketFrontendConnectionId frontend_id) { return m_UseSSL; }
     mbedtls_ssl_config * GetSSLConfig(StormSocketFrontendConnectionId frontend_id);
 #endif
 
@@ -51,7 +51,7 @@ namespace StormSockets
     bool CompleteBody(StormSocketConnectionId connection_id, StormHttpConnectionBase & http_connection);
 
     void SendClosePacket(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id);
-    void ConnectionEstablishComplete(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id) { }
+    void ConnectionEstablishComplete([[maybe_unused]] StormSocketConnectionId connection_id, [[maybe_unused]] StormSocketFrontendConnectionId frontend_id) { }
   };
 }
 

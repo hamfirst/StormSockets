@@ -125,7 +125,7 @@ namespace StormSockets
           header_len += 4;
         }
 
-        if (cur_header.GetRemainingLength() < len)
+        if ((uint64_t)cur_header.GetRemainingLength() < len)
         {
           return true;
         }
@@ -447,7 +447,7 @@ namespace StormSockets
     }
   }
 
-  void StormSocketFrontendWebsocketBase::CleanupConnection(StormWebsocketConnectionBase & ws_connection)
+  void StormSocketFrontendWebsocketBase::CleanupWebsocketConnection(StormWebsocketConnectionBase & ws_connection)
   {
     if (ws_connection.m_ReaderValid)
     {

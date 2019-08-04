@@ -109,7 +109,7 @@ namespace StormSockets
   }
 
 #ifndef DISABLE_MBED
-  bool StormSocketClientFrontendHttp::UseSSL(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  bool StormSocketClientFrontendHttp::UseSSL([[maybe_unused]] StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
   {
     auto & http_connection = GetHttpConnection(frontend_id);
     return http_connection.m_UseSSL;
@@ -150,7 +150,8 @@ namespace StormSockets
     m_ConnectionAllocator.FreeBlock(&http_connection, StormFixedBlockType::Custom);
   }
 
-  void StormSocketClientFrontendHttp::InitConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id, const void * init_data)
+  void StormSocketClientFrontendHttp::InitConnection([[maybe_unused]] StormSocketConnectionId connection_id, 
+    StormSocketFrontendConnectionId frontend_id, const void * init_data)
   {
     StormSocketClientFrontendHttpRequestData * request_data = (StormSocketClientFrontendHttpRequestData *)init_data;
 
@@ -161,9 +162,8 @@ namespace StormSockets
     m_Backend->ReferenceOutgoingHttpRequest(*http_connection.m_RequestWriter);
   }
 
-  void StormSocketClientFrontendHttp::CleanupConnection(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  void StormSocketClientFrontendHttp::CleanupConnection([[maybe_unused]] StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
   {
-    auto & connection = GetConnection(connection_id);
     auto & http_connection = GetHttpConnection(frontend_id);
 
     if (http_connection.m_RequestWriter)
@@ -183,7 +183,7 @@ namespace StormSockets
       void * parse_block = m_Allocator.ResolveHandle(connection.m_ParseBlock);
       http_connection.m_BodyReader =
         StormHttpResponseReader(parse_block, connection.m_UnparsedDataLength, connection.m_ParseOffset, connection_id, &m_Allocator, &m_MessageReaders,
-          *http_connection.m_StatusLine, *http_connection.m_ResponsePhrase, *http_connection.m_Headers);
+          *http_connection.m_StatusLine, *http_connection.m_ResponsePhrase, *http_connection.m_Headers, http_connection.m_ResponseCode);
 
       CompleteBody(connection_id, http_connection);
     }
@@ -361,6 +361,7 @@ namespace StormSockets
 
   void StormSocketClientFrontendHttp::ConnectionEstablishComplete(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
   {
+    StormSocketLog("Connection established\n");
     auto & http_connection = GetHttpConnection(frontend_id);
     m_Backend->SendHttpRequestToConnection(*http_connection.m_RequestWriter, connection_id);
 
@@ -379,7 +380,7 @@ namespace StormSockets
     {
       http_connection.m_BodyReader =
         StormHttpResponseReader(chunk_ptr, chunk_len, read_offset, connection_id, &m_Allocator, &m_MessageReaders,
-          *http_connection.m_StatusLine, *http_connection.m_ResponsePhrase, *http_connection.m_Headers);
+          *http_connection.m_StatusLine, *http_connection.m_ResponsePhrase, *http_connection.m_Headers, http_connection.m_ResponseCode);
     }
   }
 
@@ -396,7 +397,8 @@ namespace StormSockets
     {
       http_connection.m_BodyReader =
         StormHttpResponseReader(nullptr, 0, 0, connection_id, &m_Allocator, &m_MessageReaders, 
-          *http_connection.m_StatusLine, *http_connection.m_ResponsePhrase, *http_connection.m_Headers);
+          *http_connection.m_StatusLine, *http_connection.m_ResponsePhrase, *http_connection.m_Headers,
+          http_connection.m_ResponseCode);
     }
 
     StormSocketEventInfo data_message;
@@ -422,7 +424,8 @@ namespace StormSockets
   }
 
 
-  void StormSocketClientFrontendHttp::SendClosePacket(StormSocketConnectionId connection_id, StormSocketFrontendConnectionId frontend_id)
+  void StormSocketClientFrontendHttp::SendClosePacket([[maybe_unused]] StormSocketConnectionId connection_id, 
+    [[maybe_unused]] StormSocketFrontendConnectionId frontend_id)
   {
 
   }

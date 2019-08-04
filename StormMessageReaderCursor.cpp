@@ -313,12 +313,12 @@ namespace StormSockets
     while (m_DataLength > 0)
     {
       char c = PeekByte();
-      if (c == ' ')
+      if (c == ' ' && !include_spaces)
       {
         continue;
       }
 
-      hash = crc32additive(hash, c);
+      hash = crc32additive(hash, tolower(c));
       Advance(1);
     }
 

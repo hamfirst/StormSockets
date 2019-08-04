@@ -348,8 +348,9 @@ namespace StormSockets
 							Profiling::EndProfiler(prof, ProfilerCategory::kEnqueue);
 							return true;
 						}
-
+#ifndef _INCLUDEOS
             std::this_thread::yield();
+#endif
 					}
 				}
 			}
@@ -393,7 +394,7 @@ namespace StormSockets
 			return true;
 		}
 
-		bool PeekTop(T & output, int gen, StormGenIndex * queue, StormMessageMegaContainer<T> * array, int offset)
+		bool PeekTop(T & output, [[maybe_unused]] int gen, StormGenIndex * queue, StormMessageMegaContainer<T> * array, int offset)
 		{
 			if (offset >= m_Size)
 			{
@@ -432,7 +433,7 @@ namespace StormSockets
 			return true;
 		}
 
-    void ReplaceTop(const T & value, int gen, StormGenIndex * queue, StormMessageMegaContainer<T> * array, int offset)
+    void ReplaceTop(const T & value, [[maybe_unused]] int gen, StormGenIndex * queue, StormMessageMegaContainer<T> * array, int offset)
     {
       if (offset >= m_Size)
       {
@@ -546,7 +547,7 @@ namespace StormSockets
 
 		}
 
-		void Reset(int gen, StormGenIndex * queue, StormMessageMegaContainer<T> * array)
+		void Reset(int gen, StormGenIndex * queue, [[maybe_unused]] StormMessageMegaContainer<T> * array)
 		{
 			// This should be called after Lock() and everything has been drained from the queue
 			m_Tail = 0;
